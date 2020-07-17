@@ -1,4 +1,5 @@
 import { Client } from 'discord.js';
+import http from 'http';
 
 const prefix = process.env.CONSUBOT_PREFIX ?? '!';
 const token = process.env.CONSUBOT_AUTH_TOKEN ?? '';
@@ -206,3 +207,8 @@ client.on('message', (message) => {
 });
 
 client.login(token);
+
+http.createServer((request, response) => {
+  response.writeHead(200);
+  response.end("i'm not a fucking web server", 'utf-8');
+}).listen(process.env.PORT || 4096);
