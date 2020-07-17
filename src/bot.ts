@@ -1,5 +1,7 @@
 import { Client } from 'discord.js';
-import { prefix, token } from './config.json';
+
+const prefix = process.env.CONSUBOT_PREFIX ?? '!';
+const token = process.env.CONSUBOT_AUTH_TOKEN ?? '';
 
 const client = new Client();
 
