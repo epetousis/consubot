@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node ./dist/bot.js"
+    "start": "node ./dist/bot.js"
   },
   "keywords": [],
   "author": "",
