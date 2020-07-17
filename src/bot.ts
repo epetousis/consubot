@@ -182,14 +182,30 @@ client.on('message', (message) => {
         return;
       }
 
-      const replies = [' missed', ' missed', ' missed', ' missed', ' knocked their opponnent out!', ' knocked themselves out!', ' dealt 99.5 Damage'];
+      const possibleDamageAmounts = [0, 0, 0, 0, 100, -100, 99.5];
+      const index = Math.floor(Math.random() * possibleDamageAmounts.length);
+      const damageAmount = possibleDamageAmounts[index];
 
-      const result = Math.floor(Math.random() * replies.length);
-      if (result === replies.length) {
-        addHealth(taggedUser, -99.5);
+      let reply = `dealt ${damageAmount} damage`;
+
+      switch (damageAmount) {
+        case 0:
+          reply = 'missed';
+          break;
+        case 100:
+          reply = 'knocked their opponent out!';
+          addHealth(taggedUser, -damageAmount);
+          break;
+        case -100:
+          reply = 'knocked themselves out!';
+          addHealth(message.author, damageAmount);
+          break;
+        default:
+          addHealth(taggedUser, -damageAmount);
+          break;
       }
 
-      message.channel.send(`>>> ${message.author} has headbutted ${taggedUser?.username} and${replies[result]}`);
+      message.channel.send(`>>> ${message.author} has headbutted ${taggedUser?.username} and ${reply}`);
       break;
     }
     case 'heal': { // HEAL
