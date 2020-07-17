@@ -1,4 +1,4 @@
-import { Client, User } from 'discord.js';
+import { Client, User, Message } from 'discord.js';
 import http from 'http';
 
 const prefix = process.env.CONSUBOT_PREFIX ?? '!';
@@ -8,7 +8,7 @@ const client = new Client();
 
 const healthStore: {[key: string]: number} = {};
 
-const addHealth = (taggedUser: User, damage: number) => {
+const addHealth = (taggedUser: User, message: Message, damage: number) => {
   const upperLimit = 100;
   const lowerLimit = 0;
 
@@ -20,6 +20,7 @@ const addHealth = (taggedUser: User, damage: number) => {
 
   if (healthStore[taggedUser.id] < lowerLimit) {
     healthStore[taggedUser.id] = lowerLimit;
+    message.channel.send(`>>> ${message.author} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
   } else if (healthStore[taggedUser.id] > upperLimit) {
     healthStore[taggedUser.id] = upperLimit;
   }
@@ -154,7 +155,7 @@ client.on('message', (message) => {
 
       const damage = Math.floor(Math.random() * 50);
       const damageReply = damage === 0 ? 'their weak punch has healed their opponent +20 health' : `dealt ${damage} damage`;
-      addHealth(taggedUser, -damage);
+      addHealth(taggedUser, message, -damage);
 
       message.channel.send(`>>> ${message.author} has punched ${taggedUser?.username} and ${damageReply}`);
       break;
@@ -169,7 +170,7 @@ client.on('message', (message) => {
 
       const damage = Math.floor(Math.random() * 100);
       const damageReply = damage === 0 ? 'missed' : `dealt ${damage} damage`;
-      addHealth(taggedUser, -damage);
+      addHealth(taggedUser, message, -damage);
 
       message.channel.send(`>>> ${message.author} has kicked ${taggedUser?.username} and ${damageReply}`);
       break;
@@ -194,14 +195,14 @@ client.on('message', (message) => {
           break;
         case 100:
           reply = 'knocked their opponent out!';
-          addHealth(taggedUser, -damageAmount);
+          addHealth(taggedUser, message, -damageAmount);
           break;
         case -100:
           reply = 'knocked themselves out!';
-          addHealth(message.author, damageAmount);
+          addHealth(message.author, message, damageAmount);
           break;
         default:
-          addHealth(taggedUser, -damageAmount);
+          addHealth(taggedUser, message, -damageAmount);
           break;
       }
 
@@ -213,7 +214,7 @@ client.on('message', (message) => {
 
       const resultIndex = Math.floor(Math.random() * possibleHealAmounts.length);
       const healAmount = possibleHealAmounts[resultIndex];
-      addHealth(message.author, healAmount);
+      addHealth(message.author, message, healAmount);
 
       const reply = healAmount === 100 ? 'healed to max health! Wow!' : `gained ${healAmount} HP`;
 
