@@ -1,10 +1,29 @@
-import { Client } from 'discord.js';
+import { Client, User } from 'discord.js';
 import http from 'http';
 
 const prefix = process.env.CONSUBOT_PREFIX ?? '!';
 const token = process.env.CONSUBOT_AUTH_TOKEN ?? '';
 
 const client = new Client();
+
+const healthStore: {[key: string]: number} = {};
+
+const addHealth = (taggedUser: User, damage: number) => {
+  const upperLimit = 100;
+  const lowerLimit = 0;
+
+  if (!healthStore[taggedUser.id]) {
+    healthStore[taggedUser.id] = upperLimit;
+  }
+
+  healthStore[taggedUser.id] += damage;
+
+  if (healthStore[taggedUser.id] < lowerLimit) {
+    healthStore[taggedUser.id] = lowerLimit;
+  } else if (healthStore[taggedUser.id] > upperLimit) {
+    healthStore[taggedUser.id] = upperLimit;
+  }
+};
 
 client.once('ready', () => {
   console.log('Ready!');
@@ -126,56 +145,68 @@ client.on('message', (message) => {
     }
     // FIGHT
     case 'punch': { // PUNCH
-      if (!message.mentions.users.size) {
+      const taggedUser = message.mentions.users.find((v) => v != null);
+
+      if (!message.mentions.users.size || !taggedUser) {
         message.reply('you need to tag a user!');
         return;
       }
 
-      const taggedUser = message.mentions.users.first();
+      const damage = Math.floor(Math.random() * 50);
+      const damageReply = damage === 0 ? 'their weak punch has healed their opponent +20 health' : `dealt ${damage} damage`;
+      addHealth(taggedUser, -damage);
 
-      const replies = [' dealt 10 Damage', ' dealt 20 Damage', ' dealt 30 Damage', ' dealt 40 damage', ' dealt 10 damage', ' their weak punch has healed their opponent +20 health'];
-
-      const result = Math.floor(Math.random() * replies.length);
-
-      message.channel.send(`>>> ${message.author} has punched ${taggedUser?.username} and${replies[result]}`);
+      message.channel.send(`>>> ${message.author} has punched ${taggedUser?.username} and ${damageReply}`);
       break;
     }
     case 'kick': { // KICK
-      if (!message.mentions.users.size) {
+      const taggedUser = message.mentions.users.find((v) => v != null);
+
+      if (!message.mentions.users.size || !taggedUser) {
         message.reply('you need to tag a user!');
         return;
       }
 
-      const taggedUser = message.mentions.users.first();
+      const damage = Math.floor(Math.random() * 100);
+      const damageReply = damage === 0 ? 'missed' : `dealt ${damage} damage`;
+      addHealth(taggedUser, -damage);
 
-      const replies = [' missed', ' dealt 30 damage', ' dealt 30 damage', ' dealt 40 damage', ' dealt 50 Damage', ' dealt 60 Damage'];
-
-      const result = Math.floor(Math.random() * replies.length);
-
-      message.channel.send(`>>> ${message.author} has kicked ${taggedUser?.username} and${replies[result]}`);
+      message.channel.send(`>>> ${message.author} has kicked ${taggedUser?.username} and ${damageReply}`);
       break;
     }
     case 'headbutt': { // HEADBUTT
-      if (!message.mentions.users.size) {
+      const taggedUser = message.mentions.users.find((v) => v != null);
+
+      if (!message.mentions.users.size || !taggedUser) {
         message.reply('you need to tag a user!');
         return;
       }
-
-      const taggedUser = message.mentions.users.first();
 
       const replies = [' missed', ' missed', ' missed', ' missed', ' knocked their opponnent out!', ' knocked themselves out!', ' dealt 99.5 Damage'];
 
       const result = Math.floor(Math.random() * replies.length);
+      if (result === replies.length) {
+        addHealth(taggedUser, -99.5);
+      }
 
       message.channel.send(`>>> ${message.author} has headbutted ${taggedUser?.username} and${replies[result]}`);
       break;
     }
     case 'heal': { // HEAL
-      const replies = [' gained 80 hp', ' gained 40 hp', ' healed to max health! Wow!', ' gained 40 hp', ' gained 50 hp', ' gained 20 hp'];
+      const possibleHealAmounts = [80, 40, 100, 40, 50, 20];
 
-      const result = Math.floor(Math.random() * replies.length);
+      const resultIndex = Math.floor(Math.random() * possibleHealAmounts.length);
+      const healAmount = possibleHealAmounts[resultIndex];
+      addHealth(message.author, healAmount);
 
-      message.channel.send(`>>> ${message.author} has healed themselves and${replies[result]}`);
+      const reply = healAmount === 100 ? 'healed to max health! Wow!' : `gained ${healAmount} HP`;
+
+      message.channel.send(`>>> ${message.author} has healed themselves and ${reply}`);
+      break;
+    }
+    case 'health': {
+      const health = healthStore[message.author.id] ?? 100;
+      message.channel.send(`>>> ${message.author} has ${health} health`);
       break;
     }
     // GG
