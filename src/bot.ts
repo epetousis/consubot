@@ -16,12 +16,13 @@ client.on('message', (message) => {
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
   const args = message.content.slice(prefix.length).trim().split(/ +/);
-  const command = args.shift().toLowerCase();
+  const command = args.shift()?.toLowerCase();
 
   // PEPPER
   if (command === 'pepper') {
     if (!message.mentions.users.size) {
-      return message.reply('you need to tag a user!');
+      message.reply('you need to tag a user!');
+      return;
     }
 
     const taggedUser = message.mentions.users.first();
@@ -30,7 +31,7 @@ client.on('message', (message) => {
 
     const result = Math.floor(Math.random() * replies.length);
 
-    message.channel.send(`>>> ${taggedUser.username}${replies[result]}`);
+    message.channel.send(`>>> ${taggedUser?.username}${replies[result]}`);
   }
 
   // PORTAL
@@ -85,7 +86,6 @@ client.on('message', (message) => {
     ];
 
     const result = Math.floor(Math.random() * replies.length);
-    const win = Math.random();
 
     message.channel.send(`>>> ${message.author} has summoned...${replies[result]}`);
   }
@@ -100,12 +100,13 @@ client.on('message', (message) => {
   // BALL
   if (command === 'ball') {
     if (!message.mentions.users.size) {
-      return message.reply('you need to tag a user!');
+      message.reply('you need to tag a user!');
+      return;
     }
     const taggedUser = message.mentions.users.first();
 
-    const replies = [` kicked the ball towards ${taggedUser.username}... They blocked it! :soccer:`,
-      ` kicked the ball towards ${taggedUser.username}... You scored a goal! :goal:`,
+    const replies = [` kicked the ball towards ${taggedUser?.username}... They blocked it! :soccer:`,
+      ` kicked the ball towards ${taggedUser?.username}... You scored a goal! :goal:`,
     ];
 
     const result = Math.floor(Math.random() * replies.length);
@@ -121,7 +122,8 @@ client.on('message', (message) => {
   // FIGHT
   if (command === 'punch') { // PUNCH
     if (!message.mentions.users.size) {
-      return message.reply('you need to tag a user!');
+      message.reply('you need to tag a user!');
+      return;
     }
 
     const taggedUser = message.mentions.users.first();
@@ -130,11 +132,12 @@ client.on('message', (message) => {
 
     const result = Math.floor(Math.random() * replies.length);
 
-    message.channel.send(`>>> ${message.author} has punched ${taggedUser.username} and${replies[result]}`);
+    message.channel.send(`>>> ${message.author} has punched ${taggedUser?.username} and${replies[result]}`);
   }
   if (command === 'kick') { // KICK
     if (!message.mentions.users.size) {
-      return message.reply('you need to tag a user!');
+      message.reply('you need to tag a user!');
+      return;
     }
 
     const taggedUser = message.mentions.users.first();
@@ -143,11 +146,12 @@ client.on('message', (message) => {
 
     const result = Math.floor(Math.random() * replies.length);
 
-    message.channel.send(`>>> ${message.author} has kicked ${taggedUser.username} and${replies[result]}`);
+    message.channel.send(`>>> ${message.author} has kicked ${taggedUser?.username} and${replies[result]}`);
   }
   if (command === 'headbutt') { // HEADBUTT
     if (!message.mentions.users.size) {
-      return message.reply('you need to tag a user!');
+      message.reply('you need to tag a user!');
+      return;
     }
 
     const taggedUser = message.mentions.users.first();
@@ -156,7 +160,7 @@ client.on('message', (message) => {
 
     const result = Math.floor(Math.random() * replies.length);
 
-    message.channel.send(`>>> ${message.author} has headbutted ${taggedUser.username} and${replies[result]}`);
+    message.channel.send(`>>> ${message.author} has headbutted ${taggedUser?.username} and${replies[result]}`);
   }
   if (command === 'heal') { // HEAL
     const replies = [' gained 80 hp', ' gained 40 hp', ' healed to max health! Wow!', ' gained 40 hp', ' gained 50 hp', ' gained 20 hp'];
@@ -172,20 +176,22 @@ client.on('message', (message) => {
   if (messageWords[0] === '!roll') {
     if (messageWords.length === 1) {
       // !roll
-      return message.reply(
+      message.reply(
         `${Math.floor(Math.random() * 100)} ${rollFlavor}`,
       );
+      return;
     }
   }
 
   // GG
   if (command === 'gg') {
     if (!message.mentions.users.size) {
-      return message.reply('you need to tag a user!');
+      message.reply('you need to tag a user!');
+      return;
     }
     const taggedUser = message.mentions.users.first();
 
-    message.channel.send(`>>> ${message.author} GGs ${taggedUser.username}  https://imgur.com/a/2QFSk9Y`);
+    message.channel.send(`>>> ${message.author} GGs ${taggedUser?.username}  https://imgur.com/a/2QFSk9Y`);
   }
 });
 
