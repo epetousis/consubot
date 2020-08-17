@@ -13,6 +13,8 @@ function bread(message: Message) {
     message.reply('your timer has gone off.');
     console.log(`Message sent to ${message.author.id} at ${Date.now().toString()}`);
   }, duration);
+
+  message.reply('your timer has been set.');
 }
 
 export default function TimerCommands() {
