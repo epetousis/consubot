@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 
 const prefix = process.env.BOT_PREFIX ?? '!';
 
@@ -19,7 +19,7 @@ export function parseArguments(messageContent: string, delimiter?: string) {
 export default class CommandHandler {
   private handlerMap: Map<String, MessageHandlerCallback>;
 
-  private commandList: {[category: string]: string[]};
+  private commandList: {[category: string]: string};
 
   constructor() {
     this.handlerMap = new Map<String, MessageHandlerCallback>();
@@ -37,7 +37,7 @@ export default class CommandHandler {
       this.handlerMap.set(command, input[command]);
     });
 
-    this.commandList[category] = inputKeys;
+    this.commandList[category] = inputKeys.map((command) => `\`${command}\``).join(', ');
   }
 
   handle(message: Message) {
@@ -49,6 +49,15 @@ export default class CommandHandler {
     const command = args.shift()?.toLowerCase();
 
     if (!command) {
+      return;
+    }
+
+    if (command === 'help') {
+      const fields = Object.keys(this.commandList)
+        .map((category) => ({ name: category, value: this.commandList[category] }));
+      const helpEmbed = new MessageEmbed()
+        .addFields(fields);
+      message.channel.send(helpEmbed);
       return;
     }
 
