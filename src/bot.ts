@@ -2,6 +2,7 @@ import { Client } from 'discord.js';
 import http from 'http';
 import CommandHandler from './handler';
 import FightCommands from './fight';
+import TimerCommands from './timer';
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
 const permissions = 2048;
@@ -10,7 +11,8 @@ const token = process.env.BOT_AUTH_TOKEN ?? '';
 const client = new Client();
 
 const commandHandler = new CommandHandler();
-commandHandler.addHandlers(FightCommands());
+commandHandler.addHandlers(FightCommands(), 'Fighting');
+commandHandler.addHandlers(TimerCommands(), 'Timer');
 
 client.once('ready', () => {
   console.log('Ready!');
