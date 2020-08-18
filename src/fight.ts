@@ -14,7 +14,7 @@ const addHealth = (taggedUser: User, message: Message, damage: number) => {
 
   if (healthStore[taggedUser.id] < lowerLimit) {
     healthStore[taggedUser.id] = lowerLimit;
-    message.channel.send(`>>> ${message.author} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
+    message.channel.send(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
   } else if (healthStore[taggedUser.id] > upperLimit) {
     healthStore[taggedUser.id] = upperLimit;
   }
