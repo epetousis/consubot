@@ -1,5 +1,5 @@
 import { Client } from 'discord.js';
-import http from 'http';
+import express from 'express';
 import CommandHandler from './handler';
 import FightCommands from './fight';
 import TimerCommands from './timer';
@@ -9,6 +9,9 @@ const permissions = 2048;
 const token = process.env.BOT_AUTH_TOKEN ?? '';
 
 const client = new Client();
+
+const app = express();
+const port = process.env.PORT || 4096;
 
 const commandHandler = new CommandHandler();
 commandHandler.addHandlers(FightCommands(), 'Fighting');
@@ -28,9 +31,12 @@ client.on('message', (message) => {
 
 client.login(token);
 
-http.createServer((request, response) => {
-  response.writeHead(302, {
-    Location: `https://discord.com/api/oauth2/authorize?client_id=${clientId}&scope=bot&permissions=${permissions}`,
-  });
-  response.end();
-}).listen(process.env.PORT || 4096);
+app.get('/', (_req, res) => {
+  res.header('Location', `https://discord.com/api/oauth2/authorize?client_id=${clientId}&scope=bot&permissions=${permissions}`);
+  res.status(302);
+  res.send();
+});
+
+app.listen(port, () => {
+  console.log(`Bot running on port ${port}`);
+});
