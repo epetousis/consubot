@@ -10,9 +10,6 @@ const token = process.env.BOT_AUTH_TOKEN ?? '';
 
 const client = new Client();
 
-const app = express();
-const port = process.env.PORT || 4096;
-
 const commandHandler = new CommandHandler();
 commandHandler.addHandlers(FightCommands(), 'Fighting');
 commandHandler.addHandlers(TimerCommands(), 'Timer');
@@ -30,6 +27,11 @@ client.on('message', (message) => {
 });
 
 client.login(token);
+
+const app = express();
+const port = process.env.PORT || 4096;
+
+app.use(express.static('public'));
 
 app.get('/', (_req, res) => {
   res.header('Location', `https://discord.com/api/oauth2/authorize?client_id=${clientId}&scope=bot&permissions=${permissions}`);
