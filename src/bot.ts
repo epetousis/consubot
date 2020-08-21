@@ -3,6 +3,7 @@ import express from 'express';
 import CommandHandler from './handler';
 import FightCommands from './fight';
 import TimerCommands from './timer';
+import MemeCommands from './memes';
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
 const permissions = 2048;
@@ -13,6 +14,7 @@ const client = new Client();
 const commandHandler = new CommandHandler();
 commandHandler.addHandlers(FightCommands(), 'Fighting');
 commandHandler.addHandlers(TimerCommands(), 'Timer');
+commandHandler.addHandlers(MemeCommands(), 'Memes');
 
 client.once('ready', () => {
   console.log('Ready!');
