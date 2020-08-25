@@ -3,7 +3,7 @@ import parseDuration from 'parse-duration';
 
 function inPomodoro(voiceChannel: VoiceChannel): boolean {
   const perms = voiceChannel.permissionsFor(voiceChannel.guild.roles.everyone);
-  return !perms.has('SPEAK');
+  return !perms?.has('SPEAK');
 }
 
 function startPomodoro(voiceChannel: VoiceChannel) {
