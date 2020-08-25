@@ -4,6 +4,7 @@ import CommandHandler from './handler';
 import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
+import PomodoroCommands from './pomodoro';
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
 const permissions = 2048;
@@ -15,6 +16,7 @@ const commandHandler = new CommandHandler();
 commandHandler.addHandlers(FightCommands(), 'Fighting');
 commandHandler.addHandlers(TimerCommands(), 'Timer');
 commandHandler.addHandlers(MemeCommands(), 'Memes');
+commandHandler.addHandlers(PomodoroCommands(), 'Pomodoro');
 
 client.once('ready', () => {
   console.log('Ready!');
