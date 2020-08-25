@@ -12,11 +12,11 @@ function pomodoro(message: Message) {
 
   if (message.content.trim().toLowerCase() == 'done') {
     if (inPomodoro(voiceChannel)) {
-      message.reply('Finishing pomodoro timer early.')
+      message.reply('Finishing pomodoro timer early.');
       endPomodoro(voiceChannel);
     }
     else {
-      message.reply('No pomodoro running.')
+      message.reply('No pomodoro running.');
     }
     return;
   }
@@ -32,15 +32,15 @@ function pomodoro(message: Message) {
     message.reply('Pomodoro timer started.');
   }
   else {
-    message.reply('A pomodoro timer is already running for this channel! `!pomodoro done` to cancel it.')
+    message.reply('A pomodoro timer is already running for this channel! `!pomodoro done` to cancel it.');
     return;
   }
 
   message.client.setTimeout(() => {
     if (inPomodoro(voiceChannel)) {
       endPomodoro(voiceChannel);
+      message.channel.send(`Pomodoro set by ${message.author} is done!`);
     }
-    message.reply(`Pomodoro set by ${message.author} is done!`);
     console.log(`Pomodoro set by ${message.author.id} completed at ${Date.now().toString()}`);
   }, duration);
 }
