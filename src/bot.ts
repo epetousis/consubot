@@ -16,7 +16,7 @@ const commandHandler = new CommandHandler();
 commandHandler.addHandlers(FightCommands(), 'Fighting');
 commandHandler.addHandlers(TimerCommands(), 'Timer');
 commandHandler.addHandlers(MemeCommands(), 'Memes');
-commandHandler.addHandlers(PomodoroCommands(), 'Pomodoro')
+commandHandler.addHandlers(PomodoroCommands(), 'Pomodoro');
 
 client.once('ready', () => {
   console.log('Ready!');
