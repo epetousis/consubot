@@ -64,7 +64,11 @@ export default class CommandHandler {
     const handler = this.handlerMap.get(command);
 
     if (handler) {
-      handler(message);
+      // We'll pass the handler a message without the command keyword.
+      const customMessage = message;
+      customMessage.content = args.join(' ');
+
+      handler(customMessage);
     }
   }
 }
