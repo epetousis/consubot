@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import { Client } from 'discord.js';
 import express from 'express';
 import CommandHandler from './handler';
@@ -5,6 +6,9 @@ import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
 import PomodoroCommands from './pomodoro';
+import MusicCommands from './music';
+
+dotenv.config();
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
 const permissions = 2048;
@@ -17,6 +21,7 @@ commandHandler.addHandlers(FightCommands(), 'Fighting');
 commandHandler.addHandlers(TimerCommands(), 'Timer');
 commandHandler.addHandlers(MemeCommands(), 'Memes');
 commandHandler.addHandlers(PomodoroCommands(), 'Pomodoro');
+commandHandler.addHandlers(MusicCommands(), 'Music');
 
 client.once('ready', () => {
   console.log('Ready!');

@@ -1,4 +1,7 @@
+import dotenv from 'dotenv';
 import { Message, MessageEmbed } from 'discord.js';
+
+dotenv.config();
 
 const prefix = process.env.BOT_PREFIX ?? '!';
 
