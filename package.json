@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "eslint . && tsc",
     "start": "node ./dist/bot.js"
   },
   "keywords": [],
