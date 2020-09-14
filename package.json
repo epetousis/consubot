@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "eslint . && tsc",
+    "lint": "eslint .",
+    "build": "tsc",
     "start": "npm run build && node ./dist/bot.js"
   },
   "keywords": [],
