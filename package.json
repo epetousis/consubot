@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "eslint . && tsc",
-    "start": "node ./dist/bot.js"
+    "start": "node ./dist/bot.js",
+    "dev": "npm run build && npm run start"
   },
   "keywords": [],
   "author": "",
