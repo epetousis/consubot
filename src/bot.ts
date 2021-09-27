@@ -1,6 +1,8 @@
 import { Client, Collection, CommandInteraction, Intents } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import express from 'express';
+import setupAutoReacts from './autoreacts';
+
 import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
@@ -12,10 +14,14 @@ type BotCommand = {
 };
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
-const permissions = 2048;
+const permissions = 2112;
 const token = process.env.BOT_AUTH_TOKEN ?? '';
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
+const client = new Client({ intents: [
+  Intents.FLAGS.GUILDS,
+  Intents.FLAGS.GUILD_MESSAGES,
+  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+] });
 
 const commandExports = [
   FightCommands(),
@@ -77,6 +83,8 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
+setupAutoReacts(client);
+
 client.login(token);
 
 const app = express();
@@ -85,7 +93,7 @@ const port = process.env.PORT || 4096;
 app.use(express.static('public'));
 
 app.get('/', (_req, res) => {
-  res.header('Location', `https://discord.com/api/oauth2/authorize?client_id=${clientId}&scope=bot&permissions=${permissions}`);
+  res.header('Location', `https://discord.com/api/oauth2/authorize?client_id=${clientId}&scope=bot%20applications.commands&permissions=${permissions}`);
   res.status(302);
   res.send();
 });
