@@ -9,6 +9,9 @@
     "start": "node ./dist/bot.js",
     "dev": "npm run build && npm run start"
   },
+  "engines": {
+    "node": "16.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
