@@ -1,8 +1,9 @@
-import { User, Message } from 'discord.js';
+import { User, CommandInteraction } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 
 const healthStore: { [key: string]: number } = {};
 
-const addHealth = (taggedUser: User, message: Message, damage: number) => {
+const addHealth = (taggedUser: User, message: CommandInteraction, damage: number) => {
   const upperLimit = 100;
   const lowerLimit = 0;
 
@@ -14,16 +15,16 @@ const addHealth = (taggedUser: User, message: Message, damage: number) => {
 
   if (healthStore[taggedUser.id] < lowerLimit) {
     healthStore[taggedUser.id] = lowerLimit;
-    message.channel.send(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
+    message.reply(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
   } else if (healthStore[taggedUser.id] > upperLimit) {
     healthStore[taggedUser.id] = upperLimit;
   }
 };
 
-function punch(message: Message) {
-  const taggedUser = message.mentions.users.find((v) => v != null);
+function punch(message: CommandInteraction) {
+  const taggedUser = message.options.getUser('someone');
 
-  if (!message.mentions.users.size || !taggedUser) {
+  if (!taggedUser) {
     message.reply('you need to tag a user!');
     return;
   }
@@ -32,13 +33,13 @@ function punch(message: Message) {
   const damageReply = damage === 0 ? 'their weak punch has healed their opponent +20 health' : `dealt ${damage} damage`;
   addHealth(taggedUser, message, -damage);
 
-  message.channel.send(`>>> ${message.author} has punched ${taggedUser?.username} and ${damageReply}`);
+  message.reply(`>>> ${message.user} has punched ${taggedUser?.username} and ${damageReply}`);
 }
 
-function kick(message: Message) {
-  const taggedUser = message.mentions.users.find((v) => v != null);
+function kick(message: CommandInteraction) {
+  const taggedUser = message.options.getUser('someone');
 
-  if (!message.mentions.users.size || !taggedUser) {
+  if (!taggedUser) {
     message.reply('you need to tag a user!');
     return;
   }
@@ -47,13 +48,13 @@ function kick(message: Message) {
   const damageReply = damage === 0 ? 'missed' : `dealt ${damage} damage`;
   addHealth(taggedUser, message, -damage);
 
-  message.channel.send(`>>> ${message.author} has kicked ${taggedUser?.username} and ${damageReply}`);
+  message.reply(`>>> ${message.user} has kicked ${taggedUser?.username} and ${damageReply}`);
 }
 
-function headbutt(message: Message) {
-  const taggedUser = message.mentions.users.find((v) => v != null);
+function headbutt(message: CommandInteraction) {
+  const taggedUser = message.options.getUser('someone');
 
-  if (!message.mentions.users.size || !taggedUser) {
+  if (!taggedUser) {
     message.reply('you need to tag a user!');
     return;
   }
@@ -74,50 +75,55 @@ function headbutt(message: Message) {
       break;
     case -100:
       reply = 'knocked themselves out!';
-      addHealth(message.author, message, damageAmount);
+      addHealth(message.user, message, damageAmount);
       break;
     default:
       addHealth(taggedUser, message, -damageAmount);
       break;
   }
 
-  message.channel.send(`>>> ${message.author} has headbutted ${taggedUser?.username} and ${reply}`);
+  message.reply(`>>> ${message.user} has headbutted ${taggedUser?.username} and ${reply}`);
 }
 
-function heal(message: Message) {
+function heal(message: CommandInteraction) {
   const possibleHealAmounts = [80, 40, 100, 40, 50, 20];
 
   const resultIndex = Math.floor(Math.random() * possibleHealAmounts.length);
   const healAmount = possibleHealAmounts[resultIndex];
-  addHealth(message.author, message, healAmount);
+  addHealth(message.user, message, healAmount);
 
   const reply = healAmount === 100 ? 'healed to max health! Wow!' : `gained ${healAmount} HP`;
 
-  message.channel.send(`>>> ${message.author} has healed themselves and ${reply}`);
+  message.reply(`>>> ${message.user} has healed themselves and ${reply}`);
 }
 
-function health(message: Message) {
-  const callerHealth = healthStore[message.author.id] ?? 100;
-  message.channel.send(`>>> ${message.author} has ${callerHealth} health`);
+function health(message: CommandInteraction) {
+  const callerHealth = healthStore[message.user.id] ?? 100;
+  message.reply(`>>> ${message.user} has ${callerHealth} health`);
 }
 
-function gg(message: Message) {
-  if (!message.mentions.users.size) {
+function gg(message: CommandInteraction) {
+  const taggedUser = message.options.getUser('someone');
+
+  if (!taggedUser) {
     message.reply('you need to tag a user!');
     return;
   }
-  const taggedUser = message.mentions.users.first();
 
-  message.channel.send(`>>> ${message.author} GGs ${taggedUser?.username}  https://imgur.com/a/2QFSk9Y`);
+  message.reply(`>>> ${message.user} GGs ${taggedUser?.username}  https://imgur.com/a/2QFSk9Y`);
 }
 
 export default function FightCommands() {
-  return {
-    punch,
-    kick,
-    headbutt,
-    heal,
-    health,
-    gg,
-  };
+  return [
+    { handler: punch, data: new SlashCommandBuilder().setName('punch').setDescription('Punch someone')
+      .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)) },
+    { handler: kick, data: new SlashCommandBuilder().setName('kick').setDescription('Kick someone')
+      .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)) },
+    { handler: headbutt, data: new SlashCommandBuilder().setName('headbutt').setDescription('Headbutt someone')
+      .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)) },
+    { handler: heal, data: new SlashCommandBuilder().setName('heal').setDescription('Heal yourself') },
+    { handler: health, data: new SlashCommandBuilder().setName('health').setDescription('Get health') },
+    { handler: gg, data: new SlashCommandBuilder().setName('gg').setDescription('Surrender')
+      .addUserOption((option) => option.setName('someone').setDescription('Person to surrender to').setRequired(true)) },
+  ];
 }

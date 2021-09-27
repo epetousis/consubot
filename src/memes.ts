@@ -1,24 +1,38 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-function sendHostImage(message: Message, path: string) {
+function sendHostImage(message: CommandInteraction, path: string) {
   const imageHost = process.env.IMAGE_HOST_URL;
 
   if (!imageHost) {
+    message.reply({ content: 'Someone forgot to set an image host for these meme images, so I unfortunately cannot send them. ' });
     return;
   }
 
-  const imageEmbed = new MessageEmbed()
-    .setImage(`${imageHost}/${path}`);
-
-  message.channel.send(imageEmbed);
+  message.reply({ files: [`${imageHost}/${path}`] });
 }
 
 export default function MemeCommands() {
-  return {
-    away: (message: Message) => sendHostImage(message, 'memes/away.jpg'),
-    boobs: (message: Message) => sendHostImage(message, 'memes/boobs.jpg'),
-    looking: (message: Message) => sendHostImage(message, 'memes/looking.jpg'),
-    respectfully: (message: Message) => sendHostImage(message, 'memes/respectfully.jpg'),
-    shook: (message: Message) => sendHostImage(message, 'memes/shook.jpg'),
-  };
+  return [
+    {
+      handler: (message: CommandInteraction) => sendHostImage(message, 'memes/away.jpg'),
+      data: new SlashCommandBuilder().setName('away').setDescription('Away react'),
+    },
+    {
+      handler: async (message: CommandInteraction) => sendHostImage(message, 'memes/boobs.jpg'),
+      data: new SlashCommandBuilder().setName('boobs').setDescription('Boobs react'),
+    },
+    {
+      handler: (message: CommandInteraction) => sendHostImage(message, 'memes/looking.jpg'),
+      data: new SlashCommandBuilder().setName('looking').setDescription('Looking react'),
+    },
+    {
+      handler: (message: CommandInteraction) => sendHostImage(message, 'memes/respectfully.jpg'),
+      data: new SlashCommandBuilder().setName('respectfully').setDescription('Respectful react'),
+    },
+    {
+      handler: (message: CommandInteraction) => sendHostImage(message, 'memes/shook.jpg'),
+      data: new SlashCommandBuilder().setName('shook').setDescription('Shook react'),
+    },
+  ];
 }
