@@ -15,7 +15,7 @@ const addHealth = (taggedUser: User, message: CommandInteraction, damage: number
 
   if (healthStore[taggedUser.id] < lowerLimit) {
     healthStore[taggedUser.id] = lowerLimit;
-    message.reply(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
+    message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
   } else if (healthStore[taggedUser.id] > upperLimit) {
     healthStore[taggedUser.id] = upperLimit;
   }
