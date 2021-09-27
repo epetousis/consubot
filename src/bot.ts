@@ -14,7 +14,7 @@ type BotCommand = {
 };
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
-const permissions = 2048;
+const permissions = 2112;
 const token = process.env.BOT_AUTH_TOKEN ?? '';
 
 const client = new Client({ intents: [
@@ -93,7 +93,7 @@ const port = process.env.PORT || 4096;
 app.use(express.static('public'));
 
 app.get('/', (_req, res) => {
-  res.header('Location', `https://discord.com/api/oauth2/authorize?client_id=${clientId}&scope=bot&permissions=${permissions}`);
+  res.header('Location', `https://discord.com/api/oauth2/authorize?client_id=${clientId}&scope=bot%20applications.commands&permissions=${permissions}`);
   res.status(302);
   res.send();
 });
