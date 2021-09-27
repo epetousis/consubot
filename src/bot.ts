@@ -79,7 +79,13 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.replied) await interaction.reply({ content: 'Some goober added a command to me that didn\'t output a reply on completion. Possibly a bug?', ephemeral: true });
   } catch (error) {
     console.error(error);
-    await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    const messageContent = { content: 'There was an error while executing this command!', ephemeral: true };
+
+    if (interaction.replied) {
+      await interaction.followUp(messageContent);
+    } else {
+      await interaction.reply(messageContent);
+    }
   }
 });
 
