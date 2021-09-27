@@ -19,14 +19,14 @@ export function parseArguments(messageContent: string, delimiter?: string) {
 export default class CommandHandler {
   private handlerMap: Map<String, MessageHandlerCallback>;
 
-  private commandList: {[category: string]: string};
+  private commandList: { [category: string]: string };
 
   constructor() {
     this.handlerMap = new Map<String, MessageHandlerCallback>();
     this.commandList = {};
   }
 
-  addHandlers(input: {[command: string]: MessageHandlerCallback}, category: string) {
+  addHandlers(input: { [command: string]: MessageHandlerCallback }, category: string) {
     const inputKeys = Object.keys(input);
 
     if (inputKeys.includes('help')) {

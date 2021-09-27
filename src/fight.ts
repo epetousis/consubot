@@ -1,6 +1,6 @@
 import { User, Message } from 'discord.js';
 
-const healthStore: {[key: string]: number} = {};
+const healthStore: { [key: string]: number } = {};
 
 const addHealth = (taggedUser: User, message: Message, damage: number) => {
   const upperLimit = 100;
