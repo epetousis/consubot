@@ -7,7 +7,7 @@ import MemeCommands from './memes';
 import PomodoroCommands from './pomodoro';
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
-const devGuildId = process.env.BOT_DEV_GUILD_ID ?? '';
+const devGuildId = process.env.BOT_DEV_GUILD_ID;
 const token = process.env.BOT_AUTH_TOKEN ?? '';
 
 const commands = [
@@ -19,6 +19,10 @@ const commands = [
 
 const rest = new REST({ version: '9' }).setToken(token);
 
-rest.put(Routes.applicationGuildCommands(clientId, devGuildId), { body: commands })
+const commandRoute = devGuildId
+  ? Routes.applicationGuildCommands(clientId, devGuildId)
+  : Routes.applicationCommands(clientId);
+
+rest.put(commandRoute, { body: commands })
   .then(() => console.log('Application commands have been registered.'))
   .catch(console.error);
