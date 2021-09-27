@@ -12,9 +12,6 @@
   "engines": {
     "node": "16.x"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@discordjs/rest": "^0.1.0-canary.0",
     "discord.js": "^13.1.0",
