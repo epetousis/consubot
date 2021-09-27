@@ -1,6 +1,8 @@
 import { Client, Collection, CommandInteraction, Intents } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import express from 'express';
+import setupAutoReacts from './autoreacts';
+
 import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
@@ -15,7 +17,11 @@ const clientId = process.env.BOT_CLIENT_ID ?? '';
 const permissions = 2048;
 const token = process.env.BOT_AUTH_TOKEN ?? '';
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
+const client = new Client({ intents: [
+  Intents.FLAGS.GUILDS,
+  Intents.FLAGS.GUILD_MESSAGES,
+  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+] });
 
 const commandExports = [
   FightCommands(),
@@ -76,6 +82,8 @@ client.on('interactionCreate', async interaction => {
     await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
   }
 });
+
+setupAutoReacts(client);
 
 client.login(token);
 
