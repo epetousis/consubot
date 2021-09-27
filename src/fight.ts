@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 
 const healthStore: { [key: string]: number } = {};
 
-const addHealth = (taggedUser: User, message: CommandInteraction, damage: number) => {
+const addHealth = (taggedUser: User, message: CommandInteraction, damage: number): boolean => {
   const upperLimit = 100;
   const lowerLimit = 0;
 
@@ -15,28 +15,31 @@ const addHealth = (taggedUser: User, message: CommandInteraction, damage: number
 
   if (healthStore[taggedUser.id] < lowerLimit) {
     healthStore[taggedUser.id] = lowerLimit;
-    message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
+    return false;
   } else if (healthStore[taggedUser.id] > upperLimit) {
     healthStore[taggedUser.id] = upperLimit;
   }
+
+  return true;
 };
 
-function punch(message: CommandInteraction) {
+async function punch(message: CommandInteraction) {
   const taggedUser = message.options.getUser('someone');
 
   if (!taggedUser) {
-    message.reply('you need to tag a user!');
+    await message.reply('you need to tag a user!');
     return;
   }
 
   const damage = Math.floor(Math.random() * 50);
   const damageReply = damage === 0 ? 'their weak punch has healed their opponent +20 health' : `dealt ${damage} damage`;
-  addHealth(taggedUser, message, -damage);
+  const alive = addHealth(taggedUser, message, -damage);
 
-  message.reply(`>>> ${message.user} has punched ${taggedUser?.username} and ${damageReply}`);
+  await message.reply(`>>> ${message.user} has punched ${taggedUser?.username} and ${damageReply}`);
+  if (!alive) await message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
 }
 
-function kick(message: CommandInteraction) {
+async function kick(message: CommandInteraction) {
   const taggedUser = message.options.getUser('someone');
 
   if (!taggedUser) {
@@ -46,12 +49,13 @@ function kick(message: CommandInteraction) {
 
   const damage = Math.floor(Math.random() * 100);
   const damageReply = damage === 0 ? 'missed' : `dealt ${damage} damage`;
-  addHealth(taggedUser, message, -damage);
+  const alive = addHealth(taggedUser, message, -damage);
 
-  message.reply(`>>> ${message.user} has kicked ${taggedUser?.username} and ${damageReply}`);
+  await message.reply(`>>> ${message.user} has kicked ${taggedUser?.username} and ${damageReply}`);
+  if (!alive) await message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
 }
 
-function headbutt(message: CommandInteraction) {
+async function headbutt(message: CommandInteraction) {
   const taggedUser = message.options.getUser('someone');
 
   if (!taggedUser) {
@@ -64,6 +68,7 @@ function headbutt(message: CommandInteraction) {
   const damageAmount = possibleDamageAmounts[index];
 
   let reply = `dealt ${damageAmount} damage`;
+  let alive = true;
 
   switch (damageAmount) {
     case 0:
@@ -71,21 +76,22 @@ function headbutt(message: CommandInteraction) {
       break;
     case 100:
       reply = 'knocked their opponent out!';
-      addHealth(taggedUser, message, -damageAmount);
+      alive = addHealth(taggedUser, message, -damageAmount);
       break;
     case -100:
       reply = 'knocked themselves out!';
-      addHealth(message.user, message, damageAmount);
+      alive = addHealth(message.user, message, damageAmount);
       break;
     default:
-      addHealth(taggedUser, message, -damageAmount);
+      alive = addHealth(taggedUser, message, -damageAmount);
       break;
   }
 
-  message.reply(`>>> ${message.user} has headbutted ${taggedUser?.username} and ${reply}`);
+  await message.reply(`>>> ${message.user} has headbutted ${taggedUser?.username} and ${reply}`);
+  if (!alive) await message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
 }
 
-function heal(message: CommandInteraction) {
+async function heal(message: CommandInteraction) {
   const possibleHealAmounts = [80, 40, 100, 40, 50, 20];
 
   const resultIndex = Math.floor(Math.random() * possibleHealAmounts.length);
@@ -94,23 +100,23 @@ function heal(message: CommandInteraction) {
 
   const reply = healAmount === 100 ? 'healed to max health! Wow!' : `gained ${healAmount} HP`;
 
-  message.reply(`>>> ${message.user} has healed themselves and ${reply}`);
+  await message.reply(`>>> ${message.user} has healed themselves and ${reply}`);
 }
 
-function health(message: CommandInteraction) {
+async function health(message: CommandInteraction) {
   const callerHealth = healthStore[message.user.id] ?? 100;
-  message.reply(`>>> ${message.user} has ${callerHealth} health`);
+  await message.reply(`>>> ${message.user} has ${callerHealth} health`);
 }
 
-function gg(message: CommandInteraction) {
+async function gg(message: CommandInteraction) {
   const taggedUser = message.options.getUser('someone');
 
   if (!taggedUser) {
-    message.reply('you need to tag a user!');
+    await message.reply('you need to tag a user!');
     return;
   }
 
-  message.reply(`>>> ${message.user} GGs ${taggedUser?.username}  https://imgur.com/a/2QFSk9Y`);
+  await message.reply(`>>> ${message.user} GGs ${taggedUser?.username}  https://imgur.com/a/2QFSk9Y`);
 }
 
 export default function FightCommands() {

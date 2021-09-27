@@ -15,35 +15,35 @@ function endPomodoro(voiceChannel: VoiceChannel) {
   voiceChannel.permissionOverwrites.create(voiceChannel.guild.roles.everyone, { SPEAK: true });
 }
 
-function pomodoro(message: CommandInteraction) {
+async function pomodoro(message: CommandInteraction) {
   const VALID_CHANNEL_NAMES = ['study', 'pomodoro', 'uni', 'work'];
   const voiceChannel = (message.member && 'voice' in message.member) ? (message.member.voice.channel) : null;
   if (!voiceChannel || !VALID_CHANNEL_NAMES.includes(voiceChannel.name.toLowerCase()) || voiceChannel.isVoice()) {
-    message.reply(`You must be in a voice channel entitled one of: \`${VALID_CHANNEL_NAMES.join(', ')}\` to use this command.`);
+    await message.reply(`You must be in a voice channel entitled one of: \`${VALID_CHANNEL_NAMES.join(', ')}\` to use this command.`);
     return;
   }
 
   if (message.options.getString('command')?.toLowerCase() === 'done') {
     if (inPomodoro(voiceChannel)) {
-      message.reply('Finishing pomodoro timer early.');
+      await message.reply('Finishing pomodoro timer early.');
       endPomodoro(voiceChannel);
     } else {
-      message.reply('No pomodoro running.');
+      await message.reply('No pomodoro running.');
     }
     return;
   }
 
   const duration = parseDuration(message.options.getString('command') ?? '');
   if (!duration) {
-    message.reply('I was unable to parse a time from your message. Use `!pomodoro done` to override the timer.');
+    await message.reply('I was unable to parse a time from your message. Use `!pomodoro done` to override the timer.');
     return;
   }
 
   if (!inPomodoro(voiceChannel)) {
     startPomodoro(voiceChannel);
-    message.reply('Pomodoro timer started.');
+    await message.reply('Pomodoro timer started.');
   } else {
-    message.reply('A pomodoro timer is already running for this channel! `!pomodoro done` to cancel it.');
+    await message.reply('A pomodoro timer is already running for this channel! `!pomodoro done` to cancel it.');
     return;
   }
 
