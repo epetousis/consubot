@@ -1,4 +1,5 @@
-import { Message, VoiceChannel } from 'discord.js';
+import { CommandInteraction, VoiceChannel } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import parseDuration from 'parse-duration';
 
 function inPomodoro(voiceChannel: VoiceChannel): boolean {
@@ -7,32 +8,22 @@ function inPomodoro(voiceChannel: VoiceChannel): boolean {
 }
 
 function startPomodoro(voiceChannel: VoiceChannel) {
-  voiceChannel.overwritePermissions([
-    {
-      id: voiceChannel.guild.roles.everyone.id,
-      deny: ['SPEAK'],
-    },
-  ]);
+  voiceChannel.permissionOverwrites.create(voiceChannel.guild.roles.everyone, { SPEAK: false });
 }
 
 function endPomodoro(voiceChannel: VoiceChannel) {
-  voiceChannel.overwritePermissions([
-    {
-      id: voiceChannel.guild.roles.everyone.id,
-      allow: ['SPEAK'],
-    },
-  ]);
+  voiceChannel.permissionOverwrites.create(voiceChannel.guild.roles.everyone, { SPEAK: true });
 }
 
-function pomodoro(message: Message) {
+function pomodoro(message: CommandInteraction) {
   const VALID_CHANNEL_NAMES = ['study', 'pomodoro', 'uni', 'work'];
-  const voiceChannel = (message.member) ? (message.member.voice.channel) : null;
-  if (!voiceChannel || !VALID_CHANNEL_NAMES.includes(voiceChannel.name.toLowerCase())) {
+  const voiceChannel = (message.member && 'voice' in message.member) ? (message.member.voice.channel) : null;
+  if (!voiceChannel || !VALID_CHANNEL_NAMES.includes(voiceChannel.name.toLowerCase()) || voiceChannel.isVoice()) {
     message.reply(`You must be in a voice channel entitled one of: \`${VALID_CHANNEL_NAMES.join(', ')}\` to use this command.`);
     return;
   }
 
-  if (message.content.trim().toLowerCase() === 'done') {
+  if (message.options.getString('command')?.toLowerCase() === 'done') {
     if (inPomodoro(voiceChannel)) {
       message.reply('Finishing pomodoro timer early.');
       endPomodoro(voiceChannel);
@@ -42,7 +33,7 @@ function pomodoro(message: Message) {
     return;
   }
 
-  const duration = parseDuration(message.content);
+  const duration = parseDuration(message.options.getString('command') ?? '');
   if (!duration) {
     message.reply('I was unable to parse a time from your message. Use `!pomodoro done` to override the timer.');
     return;
@@ -56,17 +47,18 @@ function pomodoro(message: Message) {
     return;
   }
 
-  message.client.setTimeout(() => {
+  setTimeout(() => {
     if (inPomodoro(voiceChannel)) {
       endPomodoro(voiceChannel);
-      message.channel.send(`Pomodoro set by ${message.author} is done!`);
+      message.channel?.send(`Pomodoro set by ${message.user} is done!`);
     }
-    console.log(`Pomodoro set by ${message.author.id} completed at ${Date.now().toString()}`);
+    console.log(`Pomodoro set by ${message.user.id} completed at ${Date.now().toString()}`);
   }, duration);
 }
 
 export default function PomodoroCommands() {
-  return {
-    pomodoro,
-  };
+  return [
+    { handler: pomodoro, data: new SlashCommandBuilder().setName('pomodoro').setDescription('Control the pomodoro timer')
+      .addStringOption((option) => option.setName('command').setDescription('Command to control timer, or specific duration for pomodoro')) },
+  ];
 }
