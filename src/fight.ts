@@ -35,7 +35,7 @@ async function punch(message: CommandInteraction) {
   const damageReply = damage === 0 ? 'their weak punch has healed their opponent +20 health' : `dealt ${damage} damage`;
   const alive = addHealth(taggedUser, message, -damage);
 
-  await message.reply(`>>> ${message.user} has punched ${taggedUser?.username} and ${damageReply}`);
+  await message.reply(`>>> ${message.user} has punched ${taggedUser} and ${damageReply}`);
   if (!alive) await message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
 }
 
@@ -51,7 +51,7 @@ async function kick(message: CommandInteraction) {
   const damageReply = damage === 0 ? 'missed' : `dealt ${damage} damage`;
   const alive = addHealth(taggedUser, message, -damage);
 
-  await message.reply(`>>> ${message.user} has kicked ${taggedUser?.username} and ${damageReply}`);
+  await message.reply(`>>> ${message.user} has kicked ${taggedUser} and ${damageReply}`);
   if (!alive) await message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
 }
 
@@ -87,7 +87,7 @@ async function headbutt(message: CommandInteraction) {
       break;
   }
 
-  await message.reply(`>>> ${message.user} has headbutted ${taggedUser?.username} and ${reply}`);
+  await message.reply(`>>> ${message.user} has headbutted ${taggedUser} and ${reply}`);
   if (!alive) await message.followUp(`>>> ${taggedUser} has lost the fight :( and their health has been reset https://imgur.com/r/gifs/UKBCq4f`);
 }
 
@@ -116,7 +116,7 @@ async function gg(message: CommandInteraction) {
     return;
   }
 
-  await message.reply(`>>> ${message.user} GGs ${taggedUser?.username}  https://imgur.com/a/2QFSk9Y`);
+  await message.reply(`>>> ${message.user} GGs ${taggedUser}  https://imgur.com/a/2QFSk9Y`);
 }
 
 export default function FightCommands() {
