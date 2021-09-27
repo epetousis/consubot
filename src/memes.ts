@@ -12,27 +12,29 @@ async function sendHostImage(message: CommandInteraction, path: string) {
   await message.reply({ files: [`${imageHost}/${path}`] });
 }
 
+async function react(interaction: CommandInteraction) {
+  switch (interaction.options.getString('reaction')) {
+    case 'away':
+      return sendHostImage(interaction, 'memes/away.jpg');
+    case 'boobs':
+      return sendHostImage(interaction, 'memes/boobs.jpg');
+    case 'looking':
+      return sendHostImage(interaction, 'memes/looking.jpg');
+    case 'respectfully':
+      return sendHostImage(interaction, 'memes/respectfully.jpg');
+    case 'shook':
+      return sendHostImage(interaction, 'memes/shook.jpg');
+    default:
+      break;
+  }
+}
+
 export default function MemeCommands() {
   return [
     {
-      handler: async (message: CommandInteraction) => sendHostImage(message, 'memes/away.jpg'),
-      data: new SlashCommandBuilder().setName('away').setDescription('Away react'),
-    },
-    {
-      handler: async (message: CommandInteraction) => sendHostImage(message, 'memes/boobs.jpg'),
-      data: new SlashCommandBuilder().setName('boobs').setDescription('Boobs react'),
-    },
-    {
-      handler: async (message: CommandInteraction) => sendHostImage(message, 'memes/looking.jpg'),
-      data: new SlashCommandBuilder().setName('looking').setDescription('Looking react'),
-    },
-    {
-      handler: async (message: CommandInteraction) => sendHostImage(message, 'memes/respectfully.jpg'),
-      data: new SlashCommandBuilder().setName('respectfully').setDescription('Respectful react'),
-    },
-    {
-      handler: async (message: CommandInteraction) => sendHostImage(message, 'memes/shook.jpg'),
-      data: new SlashCommandBuilder().setName('shook').setDescription('Shook react'),
+      handler: react,
+      data: new SlashCommandBuilder().setName('react').setDescription('Send a reaction image')
+        .addStringOption((option) => option.setName('reaction').setDescription('The reaction image to send').setRequired(true)),
     },
   ];
 }
