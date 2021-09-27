@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "deploy-commands": "node ./dist/deploy-commands.js",
     "build": "eslint . && tsc",
     "start": "node ./dist/bot.js",
     "dev": "npm run build && npm run start"
