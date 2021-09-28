@@ -2,12 +2,12 @@ import { CommandInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 enum Reaction {
-  away,
-  boobs,
-  looking,
-  respectfully,
-  shook,
-  sheesh,
+  Away = 'away',
+  Boobs = 'boobs',
+  Looking = 'looking',
+  Respectfully = 'respectfully',
+  Shook = 'shook',
+  Sheesh = 'sheesh',
 }
 
 async function sendHostImage(message: CommandInteraction, path: string) {
@@ -26,17 +26,17 @@ async function react(interaction: CommandInteraction) {
   const reaction = interaction.options.getString('reaction') as Reaction | null;
 
   switch (reaction) {
-    case Reaction.away:
+    case Reaction.Away:
       return sendHostImage(interaction, 'memes/away.jpg');
-    case Reaction.boobs:
+    case Reaction.Boobs:
       return sendHostImage(interaction, 'memes/boobs.jpg');
-    case Reaction.looking:
+    case Reaction.Looking:
       return sendHostImage(interaction, 'memes/looking.jpg');
-    case Reaction.respectfully:
+    case Reaction.Respectfully:
       return sendHostImage(interaction, 'memes/respectfully.jpg');
-    case Reaction.shook:
+    case Reaction.Shook:
       return sendHostImage(interaction, 'memes/shook.jpg');
-    case Reaction.sheesh:
+    case Reaction.Sheesh:
       return sendHostImage(interaction, 'https://cdn.discordapp.com/attachments/736915758558478336/892303098142416896/Asian_Old_Man_Sheesh.mp4');
     default:
       break;
@@ -48,7 +48,7 @@ export default function MemeCommands() {
     {
       handler: react,
       data: new SlashCommandBuilder().setName('react').setDescription('Send a reaction image')
-        .addStringOption((option) => option.setName('reaction').setDescription(`The reaction image to send. Can be one of: ${Object.keys(Reaction)}`).setRequired(true)),
+        .addStringOption((option) => option.setName('reaction').setDescription(`The reaction image to send. Can be one of: ${Object.values(Reaction).join(', ')}`).setRequired(true)),
     },
   ];
 }
