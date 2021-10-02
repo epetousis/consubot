@@ -5,6 +5,7 @@ import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
 import PomodoroCommands from './pomodoro';
+import UtilCommands from './util';
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
 const devGuildId = process.env.BOT_DEV_GUILD_ID;
@@ -15,6 +16,7 @@ const commands = [
   TimerCommands(),
   MemeCommands(),
   PomodoroCommands(),
+  UtilCommands(),
 ].flat().map(command => command.data.toJSON());
 
 const rest = new REST({ version: '9' }).setToken(token);

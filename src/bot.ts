@@ -7,6 +7,7 @@ import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
 import PomodoroCommands from './pomodoro';
+import UtilCommands from './util';
 
 type BotCommand = {
   data: Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>,
@@ -14,7 +15,7 @@ type BotCommand = {
 };
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
-const permissions = 2112;
+const permissions = 2147493888;
 const token = process.env.BOT_AUTH_TOKEN ?? '';
 
 const client = new Client({ intents: [
@@ -28,6 +29,7 @@ const commandExports = [
   TimerCommands(),
   MemeCommands(),
   PomodoroCommands(),
+  UtilCommands(),
 ].flat();
 
 const commands = new Collection<string, BotCommand>();
