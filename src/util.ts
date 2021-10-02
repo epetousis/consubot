@@ -20,6 +20,12 @@ async function spoiler(message: CommandInteraction) {
 
   const messages = await message.channel?.messages.fetch({ limit: 10, before: message.id });
   const mostRecentMessageFromUser = messages?.find((value) => value.member === message.member);
+  if (!mostRecentMessageFromUser) {
+    return message.reply({
+      content: 'No recent messages found from you that can be spoiler tagged.',
+      ephemeral: true,
+    });
+  }
 
   const spoileredAttachments = mostRecentMessageFromUser?.attachments
     .map((attachment) => ({ attachment: attachment.url, name: `SPOILER_${attachment.name}` }));
