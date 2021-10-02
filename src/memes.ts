@@ -8,6 +8,7 @@ enum Reaction {
   Respectfully = 'respectfully',
   Shook = 'shook',
   Sheesh = 'sheesh',
+  What = 'what',
 }
 
 async function sendHostImage(message: CommandInteraction, path: string) {
@@ -38,6 +39,8 @@ async function react(interaction: CommandInteraction) {
       return sendHostImage(interaction, 'memes/shook.jpg');
     case Reaction.Sheesh:
       return sendHostImage(interaction, 'https://cdn.discordapp.com/attachments/736915758558478336/892303098142416896/Asian_Old_Man_Sheesh.mp4');
+    case Reaction.What:
+      return sendHostImage(interaction, 'https://cdn.discordapp.com/attachments/736911125152661557/893020296397873192/what.mp4');
     default:
       break;
   }
