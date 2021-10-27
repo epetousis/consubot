@@ -72,7 +72,7 @@ client.on('interactionCreate', async interaction => {
   const command = commands.get(interaction.commandName);
 
   if (!command) {
-    await interaction.reply({ content: 'Command wasn\'t found...?', ephemeral: true });
+    await interaction.reply({ content: 'Command wasn\'t found. This can happen while the bot is in the middle of an update. Try again in a few minutes.', ephemeral: true });
     return;
   }
 
