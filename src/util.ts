@@ -1,5 +1,6 @@
 import { CommandInteraction, Permissions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { Canvas } from 'canvas-constructor/cairo';
 
 async function spoiler(message: CommandInteraction) {
   if (!message.channel || !('guild' in message.channel)) {
@@ -34,8 +35,31 @@ async function spoiler(message: CommandInteraction) {
   await mostRecentMessageFromUser?.delete();
 }
 
+/** Generate an image of a solid colour from a hex code as input */
+async function colour(message: CommandInteraction) {
+  const hex = message.options.getString('colour');
+
+  if (!hex || !/^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i.test(hex)) {
+    return message.reply({
+      content: 'Please provide a valid hex code to generate an image of. It must start with a # and can be 3 or 6 characters.',
+      ephemeral: true,
+    });
+  }
+
+  const image = new Canvas(200, 200)
+    .setColor(hex)
+    .printRectangle(0, 0, 200, 200)
+    .toBuffer();
+
+  await message.reply({
+    files: [{ attachment: image, name: 'colour.png' }],
+  });
+}
+
 export default function UtilCommands() {
   return [
     { handler: spoiler, data: new SlashCommandBuilder().setName('spoiler').setDescription('Deletes your last sent image and reposts it with a spoilered version') },
+    { handler: colour, data: new SlashCommandBuilder().setName('colour').setDescription('Generates an image from an sRGB colour and displays it.')
+      .addStringOption((option) => option.setName('colour').setDescription('The colour to generate an image from.').setRequired(true)) },
   ];
 }
