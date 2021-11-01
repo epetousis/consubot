@@ -57,7 +57,10 @@ export default function MemeCommands() {
     {
       handler: react,
       data: new SlashCommandBuilder().setName('react').setDescription('Send a reaction image')
-        .addStringOption((option) => option.setName('reaction').setDescription(`The reaction image to send. Can be one of: ${Object.values(Reaction).join(', ')}`).setRequired(true)),
+        .addStringOption((option) => option.setName('reaction')
+          .setDescription('The reaction image to send.')
+          .setRequired(true)
+          .addChoices(Object.entries(Reaction))),
     },
   ];
 }
