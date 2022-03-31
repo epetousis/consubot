@@ -8,6 +8,7 @@ import TimerCommands from './timer';
 import MemeCommands from './memes';
 import PomodoroCommands from './pomodoro';
 import UtilCommands from './util';
+import ForestCommands, { ForestButtons } from './forest';
 
 type BotButton = {
   id: string,
@@ -30,6 +31,7 @@ const client = new Client({ intents: [
 ] });
 
 const buttonExports = [
+  ForestButtons(),
 ].flat();
 
 const buttons = new Collection<string, BotButton>();
@@ -41,6 +43,7 @@ const commandExports = [
   MemeCommands(),
   PomodoroCommands(),
   UtilCommands(),
+  ForestCommands(),
 ].flat();
 
 const commands = new Collection<string, BotCommand>();
