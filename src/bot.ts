@@ -1,4 +1,4 @@
-import { Client, Collection, CommandInteraction, Intents } from 'discord.js';
+import { ButtonInteraction, Client, Collection, CommandInteraction, Intents } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import express from 'express';
 import setupAutoReacts from './autoreacts';
@@ -8,6 +8,11 @@ import TimerCommands from './timer';
 import MemeCommands from './memes';
 import PomodoroCommands from './pomodoro';
 import UtilCommands from './util';
+
+type BotButton = {
+  id: string,
+  handler: (interaction: ButtonInteraction) => void,
+};
 
 type BotCommand = {
   data: Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>,
@@ -23,6 +28,12 @@ const client = new Client({ intents: [
   Intents.FLAGS.GUILD_MESSAGES,
   Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
 ] });
+
+const buttonExports = [
+].flat();
+
+const buttons = new Collection<string, BotButton>();
+buttonExports.forEach((button) => buttons.set(button.id, button));
 
 const commandExports = [
   FightCommands(),
@@ -67,26 +78,46 @@ client.on('interactionCreate', async interaction => {
   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE. */
-  if (!interaction.isCommand()) return;
+  if (interaction.isCommand()) {
+    const command = commands.get(interaction.commandName);
 
-  const command = commands.get(interaction.commandName);
+    if (!command) {
+      await interaction.reply({ content: 'Command wasn\'t found. This can happen while the bot is in the middle of an update. Try again in a few minutes.', ephemeral: true });
+      return;
+    }
 
-  if (!command) {
-    await interaction.reply({ content: 'Command wasn\'t found. This can happen while the bot is in the middle of an update. Try again in a few minutes.', ephemeral: true });
-    return;
-  }
+    try {
+      await command.handler(interaction);
+      if (!interaction.replied) await interaction.reply({ content: 'Some goober added a command to me that didn\'t output a reply on completion. Possibly a bug?', ephemeral: true });
+    } catch (error) {
+      console.error(error);
+      const messageContent = { content: 'There was an error while executing this command!', ephemeral: true };
 
-  try {
-    await command.handler(interaction);
-    if (!interaction.replied) await interaction.reply({ content: 'Some goober added a command to me that didn\'t output a reply on completion. Possibly a bug?', ephemeral: true });
-  } catch (error) {
-    console.error(error);
-    const messageContent = { content: 'There was an error while executing this command!', ephemeral: true };
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(messageContent);
+      } else {
+        await interaction.reply(messageContent);
+      }
+    }
+  } else if (interaction.isButton()) {
+    const button = buttons.get(interaction.customId);
 
-    if (interaction.replied) {
-      await interaction.followUp(messageContent);
-    } else {
-      await interaction.reply(messageContent);
+    if (!button) {
+      await interaction.reply({ content: 'Button action failed to run. This can happen while the bot is in the middle of an update, or if the operator broke . Try again in a few minutes.', ephemeral: true });
+      return;
+    }
+
+    try {
+      await button.handler(interaction);
+    } catch (error) {
+      console.error(error);
+      const messageContent = { content: 'There was an error while executing this button action!', ephemeral: true };
+
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(messageContent);
+      } else {
+        await interaction.reply(messageContent);
+      }
     }
   }
 });
