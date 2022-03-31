@@ -215,6 +215,10 @@ async function leaveRoomButton(interaction: ButtonInteraction) {
   }
 
   const room = rooms[token];
+  if (!room) {
+    await interaction.reply({ content: "This room doesn't exist. You probably tried to run an action on an old message.", ephemeral: true });
+    return;
+  }
   const left = await leaveRoom(room.id, BOT_TOKEN);
   clearInterval(room.roomUpdateTimer);
   if (left) {
@@ -234,6 +238,10 @@ async function plantTreeButton(interaction: ButtonInteraction) {
   }
 
   const room = rooms[token];
+  if (!room) {
+    await interaction.reply({ content: "This room doesn't exist. You probably tried to run an action on an old message.", ephemeral: true });
+    return;
+  }
   const started = await startTree(room.id, BOT_TOKEN);
   if (started) {
     await interaction.update({ content: 'Started room. The information will update in just a moment.', components: [] });
@@ -251,6 +259,10 @@ async function cancelButton(interaction: ButtonInteraction) {
   }
 
   const room = rooms[token];
+  if (!room) {
+    await interaction.reply({ content: "This room doesn't exist. You probably tried to run an action on an old message.", ephemeral: true });
+    return;
+  }
   const ended = await endTree(room.id, BOT_TOKEN);
   clearInterval(room.roomUpdateTimer);
   if (ended) {
