@@ -176,6 +176,7 @@ async function forest(message: CommandInteraction) {
       const embed = new MessageEmbed()
         .setTitle('Forest room')
         .setDescription(`Room code: ${roomResponse.token}`)
+        .setURL(`https://www.forestapp.cc/join-room?token=${roomResponse.token}`)
         .addFields(fields)
         .setFooter('This information updates every 15 seconds. Custom trees are unfortunately not supported.');
 
