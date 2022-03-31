@@ -180,7 +180,7 @@ async function forest(message: CommandInteraction) {
         .setFooter('This information updates every 15 seconds. Custom trees are unfortunately not supported.');
 
       if (!roomUpdateResponse.is_success) {
-        await message.editReply({ content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.', embeds: [embed], components: [] });
+        await message.editReply({ content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.', embeds: [], components: [] });
 
         const room = rooms[roomResponse.token];
         await leaveRoom(room.id, BOT_TOKEN);
@@ -218,7 +218,7 @@ async function leaveRoomButton(interaction: ButtonInteraction) {
   const left = await leaveRoom(room.id, BOT_TOKEN);
   clearInterval(room.roomUpdateTimer);
   if (left) {
-    await interaction.update({ content: 'Room cancelled.', components: [] });
+    await interaction.update({ content: 'Room cancelled.', embeds: [], components: [] });
   } else {
     await interaction.reply({ content: "Couldn't leave and cancel the room.", ephemeral: true });
   }
@@ -254,7 +254,7 @@ async function cancelButton(interaction: ButtonInteraction) {
   const ended = await endTree(room.id, BOT_TOKEN);
   clearInterval(room.roomUpdateTimer);
   if (ended) {
-    await interaction.update({ content: 'Killed tree.', components: [] });
+    await interaction.update({ content: 'Killed tree.', embeds: [], components: [] });
   } else {
     await interaction.reply({ content: "Couldn't kill tree.", ephemeral: true });
   }
