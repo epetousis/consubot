@@ -132,7 +132,7 @@ async function forest(message: CommandInteraction) {
 
   const roomResponse = await createRoom(duration, BOT_TOKEN);
   if (!roomResponse) {
-    return message.editReply('Something went wrong trying to create a room.');
+    return message.editReply('Something went wrong trying to create a room. You may have entered an invalid time - Forest only allows a minimum of 10 minutes and a maximum of 3 hours.');
   }
 
   const startActionRow = new MessageActionRow()
