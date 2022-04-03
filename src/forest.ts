@@ -156,18 +156,18 @@ async function forest(interaction: CommandInteraction) {
         .setStyle('PRIMARY'),
     );
 
-  const duringActionRow = new MessageActionRow()
-    .addComponents(
-      new MessageButton()
-        .setCustomId('chopTree')
-        .setLabel('Give up')
-        .setStyle('DANGER'),
-    );
+  // const duringActionRow = new MessageActionRow()
+  //   .addComponents(
+  //     new MessageButton()
+  //       .setCustomId('chopTree')
+  //       .setLabel('Give up')
+  //       .setStyle('DANGER'),
+  //   );
 
   const updateRoomMessage = async () => {
     const roomUpdateResponse = await queryRoom(roomResponse.id, BOT_TOKEN);
     if (roomUpdateResponse) {
-      let actionRow = startActionRow;
+      let actionRow: MessageActionRow | null = startActionRow;
 
       const participants = roomUpdateResponse.participants.map((participant: Record<string, any>) => participant.name);
       const fields = [
@@ -175,7 +175,7 @@ async function forest(interaction: CommandInteraction) {
         { name: 'Participants', value: `${roomUpdateResponse.participants_count} participants\n\n${participants.join(', ')}` },
       ];
       if (roomUpdateResponse.start_time) {
-        actionRow = duringActionRow;
+        actionRow = null;
         const startDate = new Date(roomUpdateResponse.start_time);
         const secondsElapsed = ((new Date()).getTime() - startDate.getTime()) / 1000;
         const secondsRemaining = roomUpdateResponse.target_duration - secondsElapsed;
@@ -205,7 +205,7 @@ async function forest(interaction: CommandInteraction) {
         return;
       }
 
-      await message.edit({ content: null, embeds: [embed], components: [actionRow] });
+      await message.edit({ content: null, embeds: [embed], components: actionRow ? [actionRow] : [] });
     } else {
       await message.edit('Something went wrong trying to get room details.');
     }
