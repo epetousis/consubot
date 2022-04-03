@@ -3,7 +3,6 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 
 enum Reaction {
   Away = 'away',
-  Boobs = 'boobs',
   Looking = 'looking',
   Respectfully = 'respectfully',
   Shook = 'shook',
@@ -31,8 +30,6 @@ async function react(interaction: CommandInteraction) {
   switch (reaction) {
     case Reaction.Away:
       return sendHostImage(interaction, 'memes/away.jpg');
-    case Reaction.Boobs:
-      return sendHostImage(interaction, 'memes/boobs.jpg');
     case Reaction.Looking:
       return sendHostImage(interaction, 'memes/looking.jpg');
     case Reaction.Respectfully:
