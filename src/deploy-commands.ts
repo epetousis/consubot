@@ -19,7 +19,7 @@ const commands = [
   PomodoroCommands(),
   UtilCommands(),
   ForestCommands(),
-].flat().map(command => command.data.toJSON());
+].flat().map((command) => command.data.toJSON());
 
 const rest = new REST({ version: '9' }).setToken(token);
 

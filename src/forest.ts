@@ -1,4 +1,10 @@
-import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import {
+  ButtonInteraction,
+  CommandInteraction,
+  MessageActionRow,
+  MessageButton,
+  MessageEmbed,
+} from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import fetch from 'node-fetch';
 
@@ -15,9 +21,9 @@ async function createRoom(duration: number | undefined, token: string) {
         'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
       },
       body: JSON.stringify({
-        'room_type': 'chartered',
-        'target_duration': duration ?? 1500,
-        'tree_type': 0,
+        room_type: 'chartered',
+        target_duration: duration ?? 1500,
+        tree_type: 0,
       }),
     },
   );
@@ -101,7 +107,7 @@ async function endTree(room: string, token: string) {
         'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
       },
       body: JSON.stringify({
-        'end_time': (new Date()).toISOString(),
+        end_time: (new Date()).toISOString(),
       }),
     },
   );
@@ -109,11 +115,11 @@ async function endTree(room: string, token: string) {
 }
 
 function secondsToTime(e: number) {
-  const h = Math.floor(e / 3600).toString().padStart(2, '0'),
-    m = Math.floor(e % 3600 / 60).toString().padStart(2, '0'),
-    s = Math.floor(e % 60).toString().padStart(2, '0');
+  const h = Math.floor(e / 3600).toString().padStart(2, '0');
+  const m = Math.floor((e % 3600) / 60).toString().padStart(2, '0');
+  const s = Math.floor(e % 60).toString().padStart(2, '0');
 
-  return h + ':' + m + ':' + s;
+  return `${h}:${m}:${s}`;
 }
 
 // TODO: place this in a database
@@ -134,12 +140,14 @@ async function forest(interaction: CommandInteraction) {
   const duration = (interaction.options.getInteger('duration') ?? 25) * 60;
   const message = await interaction.fetchReply();
   if (!('edit' in message)) {
-    return interaction.editReply('A critical error occurred. Discord has broken something.');
+    await interaction.editReply('A critical error occurred. Discord has broken something.');
+    return;
   }
 
   const roomResponse = await createRoom(duration, BOT_TOKEN);
   if (!roomResponse) {
-    return interaction.editReply('Something went wrong trying to create a room. You may have entered an invalid time - Forest only allows a minimum of 10 minutes and a maximum of 3 hours.');
+    await interaction.editReply('Something went wrong trying to create a room. You may have entered an invalid time - Forest only allows a minimum of 10 minutes and a maximum of 3 hours.');
+    return;
   }
 
   await interaction.editReply('Room created. Reloading data...');
@@ -169,7 +177,9 @@ async function forest(interaction: CommandInteraction) {
     if (roomUpdateResponse) {
       let actionRow: MessageActionRow | null = startActionRow;
 
-      const participants = roomUpdateResponse.participants.map((participant: Record<string, any>) => participant.name);
+      const participants = roomUpdateResponse.participants
+        .map((participant: Record<string, any>) => participant.name);
+
       const fields = [
         { name: 'Length', value: `${Math.floor(roomResponse.target_duration / 60)} minutes` },
         { name: 'Participants', value: `${roomUpdateResponse.participants_count} participants\n\n${participants.join(', ')}` },
@@ -190,14 +200,19 @@ async function forest(interaction: CommandInteraction) {
         .setFooter({ text: 'This information updates every 15 seconds. Custom trees are unfortunately not supported.' });
 
       if (!roomUpdateResponse.is_success) {
-        await message.edit({ content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.', embeds: [], components: [] });
+        await message.edit({
+          content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.',
+          embeds: [],
+          components: [],
+        });
 
         await cleanUpRoom(roomResponse.token);
 
         return;
       }
 
-      if (roomUpdateResponse.end_time && Date.now() > new Date(roomUpdateResponse.end_time).getTime()) {
+      const endDate = new Date(roomUpdateResponse.end_time);
+      if (roomUpdateResponse.end_time && Date.now() > endDate.getTime()) {
         await message.edit({ content: 'Tree has grown!', embeds: [], components: [] });
 
         await cleanUpRoom(roomResponse.token);
@@ -205,7 +220,11 @@ async function forest(interaction: CommandInteraction) {
         return;
       }
 
-      await message.edit({ content: null, embeds: [embed], components: actionRow ? [actionRow] : [] });
+      await message.edit({
+        content: null,
+        embeds: [embed],
+        components: actionRow ? [actionRow] : [],
+      });
     } else {
       await message.edit('Something went wrong trying to get room details.');
     }
@@ -299,13 +318,16 @@ export function ForestButtons() {
 
 export default function ForestCommands() {
   return [
-    { handler: forest, data: new SlashCommandBuilder().setName('forest').setDescription('Create a Forest room')
-      .addIntegerOption(
-        (option) => option
-          .setName('duration')
-          .setMinValue(10)
-          .setMinValue(180)
-          .setDescription('Duration for timer in minutes. Defaults to 25 minutes.'),
-      ) },
+    {
+      handler: forest,
+      data: new SlashCommandBuilder().setName('forest').setDescription('Create a Forest room')
+        .addIntegerOption(
+          (option) => option
+            .setName('duration')
+            .setMinValue(10)
+            .setMinValue(180)
+            .setDescription('Duration for timer in minutes. Defaults to 25 minutes.'),
+        ),
+    },
   ];
 }

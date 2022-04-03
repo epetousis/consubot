@@ -32,7 +32,7 @@ async function spoiler(message: CommandInteraction) {
     .map((attachment) => ({ attachment: attachment.url, name: `SPOILER_${attachment.name}` }));
 
   await message.reply({ content: `From ${message.user}`, files: spoileredAttachments });
-  await mostRecentMessageFromUser?.delete();
+  return mostRecentMessageFromUser?.delete();
 }
 
 /** Generate an image of a solid colour from a hex code as input */
@@ -51,15 +51,21 @@ async function colour(message: CommandInteraction) {
     .printRectangle(0, 0, 200, 200)
     .toBuffer();
 
-  await message.reply({
+  return message.reply({
     files: [{ attachment: image, name: 'colour.png' }],
   });
 }
 
 export default function UtilCommands() {
   return [
-    { handler: spoiler, data: new SlashCommandBuilder().setName('spoiler').setDescription('Deletes your last sent image and reposts it with a spoilered version') },
-    { handler: colour, data: new SlashCommandBuilder().setName('colour').setDescription('Generates an image from an sRGB colour and displays it.')
-      .addStringOption((option) => option.setName('colour').setDescription('The colour to generate an image from.').setRequired(true)) },
+    {
+      handler: spoiler,
+      data: new SlashCommandBuilder().setName('spoiler').setDescription('Deletes your last sent image and reposts it with a spoilered version'),
+    },
+    {
+      handler: colour,
+      data: new SlashCommandBuilder().setName('colour').setDescription('Generates an image from an sRGB colour and displays it.')
+        .addStringOption((option) => option.setName('colour').setDescription('The colour to generate an image from.').setRequired(true)),
+    },
   ];
 }

@@ -18,7 +18,9 @@ function endPomodoro(voiceChannel: VoiceChannel) {
 async function pomodoro(message: CommandInteraction) {
   const VALID_CHANNEL_NAMES = ['study', 'pomodoro', 'uni', 'work'];
   const voiceChannel = (message.member && 'voice' in message.member) ? (message.member.voice.channel) : null;
-  if (!voiceChannel || !VALID_CHANNEL_NAMES.includes(voiceChannel.name.toLowerCase()) || voiceChannel.isVoice()) {
+  if (!voiceChannel
+    || !VALID_CHANNEL_NAMES.includes(voiceChannel.name.toLowerCase())
+    || voiceChannel.isVoice()) {
     await message.reply(`You must be in a voice channel entitled one of: \`${VALID_CHANNEL_NAMES.join(', ')}\` to use this command.`);
     return;
   }
@@ -58,7 +60,10 @@ async function pomodoro(message: CommandInteraction) {
 
 export default function PomodoroCommands() {
   return [
-    { handler: pomodoro, data: new SlashCommandBuilder().setName('pomodoro').setDescription('Control the pomodoro timer')
-      .addStringOption((option) => option.setName('command').setDescription('Command to control timer, or specific duration for pomodoro')) },
+    {
+      handler: pomodoro,
+      data: new SlashCommandBuilder().setName('pomodoro').setDescription('Control the pomodoro timer')
+        .addStringOption((option) => option.setName('command').setDescription('Command to control timer, or specific duration for pomodoro')),
+    },
   ];
 }

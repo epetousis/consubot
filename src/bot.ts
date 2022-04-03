@@ -1,4 +1,9 @@
-import { ButtonInteraction, Client, CommandInteraction, Intents } from 'discord.js';
+import {
+  ButtonInteraction,
+  Client,
+  CommandInteraction,
+  Intents,
+} from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import express from 'express';
 import setupAutoReacts from './autoreacts';
@@ -24,11 +29,13 @@ const clientId = process.env.BOT_CLIENT_ID ?? '';
 const permissions = 2147493888;
 const token = process.env.BOT_AUTH_TOKEN ?? '';
 
-const client = new Client({ intents: [
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-] });
+const client = new Client({
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  ],
+});
 
 const buttonExports = [
   ForestButtons(),
@@ -57,7 +64,7 @@ client.once('ready', () => {
   client.user.setActivity('with your emotions');
 });
 
-client.on('interactionCreate', async interaction => {
+client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
     const commandDefinition = commandDefinitions.get(interaction.commandName);
 

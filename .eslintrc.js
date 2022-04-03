@@ -10,12 +10,10 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   extends: [
-    'airbnb-typescript',
+    'airbnb-base',
+    'airbnb-typescript/base',
   ],
   rules: {
     'no-console': 'off',
-    'react/jsx-filename-extension': [0],
-    'import/extensions': 'off',
-    'import/no-extraneous-dependencies': 'off',
   },
 };

@@ -45,7 +45,7 @@ async function react(interaction: CommandInteraction) {
     case Reaction.Everyday:
       return sendHostImage(interaction, 'https://cdn.discordapp.com/attachments/873406310983565365/904601141071986688/everyday.mp4');
     default:
-      break;
+      return null;
   }
 }
 

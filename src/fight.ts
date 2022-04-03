@@ -16,7 +16,9 @@ const addHealth = (taggedUser: User, message: CommandInteraction, damage: number
   if (healthStore[taggedUser.id] < lowerLimit) {
     healthStore[taggedUser.id] = lowerLimit;
     return false;
-  } else if (healthStore[taggedUser.id] > upperLimit) {
+  }
+
+  if (healthStore[taggedUser.id] > upperLimit) {
     healthStore[taggedUser.id] = upperLimit;
   }
 
@@ -121,15 +123,33 @@ async function gg(message: CommandInteraction) {
 
 export default function FightCommands() {
   return [
-    { handler: punch, data: new SlashCommandBuilder().setName('punch').setDescription('Punch someone')
-      .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)) },
-    { handler: kick, data: new SlashCommandBuilder().setName('kick').setDescription('Kick someone')
-      .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)) },
-    { handler: headbutt, data: new SlashCommandBuilder().setName('headbutt').setDescription('Headbutt someone')
-      .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)) },
-    { handler: heal, data: new SlashCommandBuilder().setName('heal').setDescription('Heal yourself') },
-    { handler: health, data: new SlashCommandBuilder().setName('health').setDescription('Get health') },
-    { handler: gg, data: new SlashCommandBuilder().setName('gg').setDescription('Surrender')
-      .addUserOption((option) => option.setName('someone').setDescription('Person to surrender to').setRequired(true)) },
+    {
+      handler: punch,
+      data: new SlashCommandBuilder().setName('punch').setDescription('Punch someone')
+        .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)),
+    },
+    {
+      handler: kick,
+      data: new SlashCommandBuilder().setName('kick').setDescription('Kick someone')
+        .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)),
+    },
+    {
+      handler: headbutt,
+      data: new SlashCommandBuilder().setName('headbutt').setDescription('Headbutt someone')
+        .addUserOption((option) => option.setName('someone').setDescription('Person to attack').setRequired(true)),
+    },
+    {
+      handler: heal,
+      data: new SlashCommandBuilder().setName('heal').setDescription('Heal yourself'),
+    },
+    {
+      handler: health,
+      data: new SlashCommandBuilder().setName('health').setDescription('Get health'),
+    },
+    {
+      handler: gg,
+      data: new SlashCommandBuilder().setName('gg').setDescription('Surrender')
+        .addUserOption((option) => option.setName('someone').setDescription('Person to surrender to').setRequired(true)),
+    },
   ];
 }

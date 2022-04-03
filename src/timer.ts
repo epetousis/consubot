@@ -20,7 +20,10 @@ async function timer(message: CommandInteraction) {
 
 export default function TimerCommands() {
   return [
-    { handler: timer, data: new SlashCommandBuilder().setName('timer').setDescription('Start a timer')
-      .addStringOption((option) => option.setName('duration').setDescription('Duration of timer').setRequired(true)) },
+    {
+      handler: timer,
+      data: new SlashCommandBuilder().setName('timer').setDescription('Start a timer')
+        .addStringOption((option) => option.setName('duration').setDescription('Duration of timer').setRequired(true)),
+    },
   ];
 }
