@@ -119,17 +119,30 @@ function secondsToTime(e: number){
 // TODO: place this in a database
 const rooms: Record<string, Record<string, any>> = {};
 
-async function forest(message: CommandInteraction) {
+async function cleanUpRoom(token: string) {
+  const room = rooms[token];
+  await leaveRoom(room.id, BOT_TOKEN);
+  clearInterval(room.roomUpdateTimer);
+  delete room[token];
+}
+
+async function forest(interaction: CommandInteraction) {
   // The Forest command makes web requests of unknown response time - buy ourselves some time
-  await message.deferReply();
+  await interaction.deferReply();
 
   // Get duration in seconds
-  const duration = (message.options.getInteger('duration') ?? 25) * 60;
+  const duration = (interaction.options.getInteger('duration') ?? 25) * 60;
+  const message = await interaction.fetchReply();
+  if (!('edit' in message)) {
+    return interaction.editReply('A critical error occurred. Discord has broken something.');
+  }
 
   const roomResponse = await createRoom(duration, BOT_TOKEN);
   if (!roomResponse) {
-    return message.editReply('Something went wrong trying to create a room. You may have entered an invalid time - Forest only allows a minimum of 10 minutes and a maximum of 3 hours.');
+    return interaction.editReply('Something went wrong trying to create a room. You may have entered an invalid time - Forest only allows a minimum of 10 minutes and a maximum of 3 hours.');
   }
+
+  await interaction.editReply('Room created. Reloading data...');
 
   const startActionRow = new MessageActionRow()
     .addComponents(
@@ -174,21 +187,27 @@ async function forest(message: CommandInteraction) {
         .setDescription(`Room code: ${roomResponse.token}`)
         .setURL(`https://www.forestapp.cc/join-room?token=${roomResponse.token}`)
         .addFields(fields)
-        .setFooter('This information updates every 15 seconds. Custom trees are unfortunately not supported.');
+        .setFooter({ text: 'This information updates every 15 seconds. Custom trees are unfortunately not supported.' });
 
       if (!roomUpdateResponse.is_success) {
-        await message.editReply({ content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.', embeds: [], components: [] });
+        await message.edit({ content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.', embeds: [], components: [] });
 
-        const room = rooms[roomResponse.token];
-        await leaveRoom(room.id, BOT_TOKEN);
-        clearInterval(room.roomUpdateTimer);
-        delete room[roomResponse.token];
+        await cleanUpRoom(roomResponse.token);
 
         return;
       }
-      await message.editReply({ content: null, embeds: [embed], components: [actionRow] });
+
+      if (roomUpdateResponse.end_time && Date.now() > new Date(roomUpdateResponse.end_time).getTime()) {
+        await message.edit({ content: 'Tree has grown!', embeds: [], components: [] });
+
+        await cleanUpRoom(roomResponse.token);
+
+        return;
+      }
+
+      await message.edit({ content: null, embeds: [embed], components: [actionRow] });
     } else {
-      await message.editReply('Something went wrong trying to get room details.');
+      await message.edit('Something went wrong trying to get room details.');
     }
   };
 
@@ -197,7 +216,7 @@ async function forest(message: CommandInteraction) {
 
   rooms[roomResponse.token] = {
     id: roomResponse.id,
-    interaction: message,
+    message,
     token: roomResponse.token,
     roomUpdateTimer,
   };
