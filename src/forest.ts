@@ -1,6 +1,5 @@
 import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import parseDuration from 'parse-duration';
 import fetch from 'node-fetch';
 
 const BOT_TOKEN = process.env.FOREST_BOT_TOKEN ?? '';
@@ -124,11 +123,8 @@ async function forest(message: CommandInteraction) {
   // The Forest command makes web requests of unknown response time - buy ourselves some time
   await message.deferReply();
 
-  const duration = parseDuration(message.options.getString('duration') ?? '25 min', 's');
-  if (!duration) {
-    await message.editReply('Invalid time provided.');
-    return;
-  }
+  // Get duration in seconds
+  const duration = (message.options.getInteger('duration') ?? 25) * 60;
 
   const roomResponse = await createRoom(duration, BOT_TOKEN);
   if (!roomResponse) {
@@ -285,6 +281,12 @@ export function ForestButtons() {
 export default function ForestCommands() {
   return [
     { handler: forest, data: new SlashCommandBuilder().setName('forest').setDescription('Create a Forest room')
-      .addStringOption((option) => option.setName('duration').setDescription('Duration for timer. Forest only allows a minimum of 10 minutes and a maximum of 3 hours.')) },
+      .addIntegerOption(
+        (option) => option
+          .setName('duration')
+          .setMinValue(10)
+          .setMinValue(180)
+          .setDescription('Duration for timer in minutes. Defaults to 25 minutes.'),
+      ) },
   ];
 }
