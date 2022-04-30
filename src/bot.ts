@@ -11,7 +11,6 @@ import setupAutoReacts from './autoreacts';
 import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
-import PomodoroCommands from './pomodoro';
 import UtilCommands from './util';
 import ForestCommands, { ForestButtons } from './forest';
 
@@ -48,7 +47,6 @@ const commandExports = [
   FightCommands(),
   TimerCommands(),
   MemeCommands(),
-  PomodoroCommands(),
   UtilCommands(),
   ForestCommands(),
 ].flat();

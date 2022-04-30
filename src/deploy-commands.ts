@@ -4,7 +4,6 @@ import { Routes } from 'discord-api-types/v9';
 import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
-import PomodoroCommands from './pomodoro';
 import UtilCommands from './util';
 import ForestCommands from './forest';
 
@@ -16,7 +15,6 @@ const commands = [
   FightCommands(),
   TimerCommands(),
   MemeCommands(),
-  PomodoroCommands(),
   UtilCommands(),
   ForestCommands(),
 ].flat().map((command) => command.data.toJSON());
