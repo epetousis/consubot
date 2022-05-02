@@ -1,6 +1,6 @@
 import { Client } from 'discord.js';
 
-const reacts = ['omegalul'];
+const reacts = ['omegalul', 'kekw'];
 
 /**
  * Adds event listeners to allow for doubling up message reacts.
