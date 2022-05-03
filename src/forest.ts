@@ -325,7 +325,7 @@ export default function ForestCommands() {
           (option) => option
             .setName('duration')
             .setMinValue(10)
-            .setMinValue(180)
+            .setMaxValue(180)
             .setDescription('Duration for timer in minutes. Defaults to 25 minutes.'),
         ),
     },
