@@ -13,6 +13,7 @@ import TimerCommands from './timer';
 import MemeCommands from './memes';
 import UtilCommands from './util';
 import ForestCommands, { ForestButtons } from './forest';
+import { setupObama } from './obama';
 
 type BotButton = {
   id: string,
@@ -108,7 +109,7 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 setupAutoReacts(client);
-
+setupObama(client);
 client.login(token);
 
 const app = express();
