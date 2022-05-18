@@ -12,7 +12,8 @@ export default function setupObama(client: Client) {
   client.on('messageCreate', (message) => {
     if (message.content.toLowerCase().includes(DISCRIMINATOR)) {
       console.log('recieved obama');
-      if (Math.random() < getProbability(++mesageCounter)) {
+      mesageCounter += 1;
+      if (Math.random() < getProbability(mesageCounter)) {
         message.channel.send('https://m.youtube.com/watch?v=0aQwnxwnve0');
         mesageCounter = 0;
       }
