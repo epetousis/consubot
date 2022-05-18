@@ -7,13 +7,13 @@ import {
 import { SlashCommandBuilder } from '@discordjs/builders';
 import express from 'express';
 import setupAutoReacts from './autoreacts';
+import setupObama from './obama';
 
 import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
 import UtilCommands from './util';
 import ForestCommands, { ForestButtons } from './forest';
-import { setupObama } from './obama';
 
 type BotButton = {
   id: string,
