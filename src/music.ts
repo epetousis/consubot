@@ -2,7 +2,13 @@ import stream from 'stream';
 import { CommandInteraction } from 'discord.js';
 import ytdl from 'ytdl-core';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { AudioPlayerStatus, createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
+import {
+  AudioPlayerStatus,
+  createAudioPlayer,
+  createAudioResource,
+  joinVoiceChannel,
+  VoiceConnectionStatus,
+} from '@discordjs/voice';
 
 async function play(interaction: CommandInteraction) {
   await interaction.deferReply();
