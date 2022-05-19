@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "deploy-commands": "node ./dist/deploy-commands.js",
-    "build": "eslint . && tsc && npm run deploy-commands",
+    "lint-and-compile": "eslint . && tsc",
+    "build": "npm run lint-and-compile && npm run deploy-commands",
     "start": "node ./dist/bot.js",
     "dev": "npm run build && npm run start"
   },
