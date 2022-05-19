@@ -12,6 +12,7 @@ import setupObama from './obama';
 import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
+import TextMemeCommands from './textmemes';
 import UtilCommands from './util';
 import ForestCommands, { ForestButtons } from './forest';
 
@@ -48,6 +49,7 @@ const commandExports = [
   FightCommands(),
   TimerCommands(),
   MemeCommands(),
+  TextMemeCommands(),
   UtilCommands(),
   ForestCommands(),
 ].flat();
