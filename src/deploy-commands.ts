@@ -6,6 +6,7 @@ import TimerCommands from './timer';
 import MemeCommands from './memes';
 import UtilCommands from './util';
 import ForestCommands from './forest';
+import TextMemeCommands from './textmemes';
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';
 const devGuildId = process.env.BOT_DEV_GUILD_ID;
@@ -15,6 +16,7 @@ const commands = [
   FightCommands(),
   TimerCommands(),
   MemeCommands(),
+  TextMemeCommands(),
   UtilCommands(),
   ForestCommands(),
 ].flat().map((command) => command.data.toJSON());
