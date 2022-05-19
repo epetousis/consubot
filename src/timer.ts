@@ -1,24 +1,29 @@
-import { Message } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import parseDuration from 'parse-duration';
 
-function bread(message: Message) {
-  const duration = parseDuration(message.content);
+async function timer(message: CommandInteraction) {
+  const duration = parseDuration(message.options.getString('duration') ?? '');
 
   if (!duration) {
-    message.reply('I was unable to parse a time from your message.');
+    await message.reply('I was unable to parse a time from your message.');
     return;
   }
 
-  message.client.setTimeout(() => {
-    message.reply('your timer has gone off.');
-    console.log(`Message sent to ${message.author.id} at ${Date.now().toString()}`);
+  setTimeout(() => {
+    message.channel?.send('your timer has gone off.');
+    console.log(`Message sent to ${message.user.id} at ${Date.now().toString()}`);
   }, duration);
 
-  message.reply('your timer has been set.');
+  await message.reply('your timer has been set.');
 }
 
 export default function TimerCommands() {
-  return {
-    bread,
-  };
+  return [
+    {
+      handler: timer,
+      data: new SlashCommandBuilder().setName('timer').setDescription('Start a timer')
+        .addStringOption((option) => option.setName('duration').setDescription('Duration of timer').setRequired(true)),
+    },
+  ];
 }

@@ -10,7 +10,8 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   extends: [
-    'airbnb-typescript',
+    'airbnb-base',
+    'airbnb-typescript/base',
   ],
   rules: {
     'no-console': 'off',

@@ -1,34 +1,53 @@
 import stream from 'stream';
-import { Message } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 import ytdl from 'ytdl-core';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { AudioPlayerStatus, createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 
-async function play(message: Message) {
-  if (!message.member?.voice.channel) {
+async function play(interaction: CommandInteraction) {
+  await interaction.deferReply();
+
+  if (!interaction.member
+    || !('voice' in interaction.member)
+    || !interaction.member?.voice.channelId) {
     return;
   }
 
-  const connection = await message.member.voice.channel.join();
+  const connection = joinVoiceChannel({
+    channelId: interaction.member.voice.channelId,
+    guildId: interaction.member.voice.guild.id,
+    adapterCreator: interaction.member.voice.guild.voiceAdapterCreator as any,
+  });
 
-  const video = ytdl(message.content, { quality: 'highestaudio' });
+  const url = interaction.options.getString('url');
+  if (!url) return;
+  const video = ytdl(url, { quality: 'highestaudio' });
   const pass = new stream.PassThrough();
   video.pipe(pass);
-  const dispatcher = connection.play(pass, { volume: 0.05 });
+  const player = createAudioPlayer();
+  const resource = createAudioResource(pass);
+  player.play(resource);
+  connection.subscribe(player);
 
-  connection.on('disconnect', () => {
+  connection.on(VoiceConnectionStatus.Disconnected, () => {
     video.destroy();
-    dispatcher.destroy();
-    message.channel.send('I was just disconnected :(');
+    interaction.editReply('I was just disconnected :(');
   });
 
-  dispatcher.on('finish', () => {
+  player.on(AudioPlayerStatus.Idle, () => {
     connection.disconnect();
     video.destroy();
-    dispatcher.destroy();
   });
+
+  interaction.editReply('Playing song in channel.');
 }
 
 export default function MusicCommands() {
-  return {
-    play,
-  };
+  return [
+    {
+      handler: play,
+      data: new SlashCommandBuilder().setName('play')
+        .addStringOption((option) => option.setName('url').setDescription('URL of a video to play')),
+    },
+  ];
 }
