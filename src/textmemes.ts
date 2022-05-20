@@ -1,7 +1,6 @@
 import { CommandInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Jimp from 'jimp';
-import Fs from 'fs';
 
 enum ReactionImage {
   Rdj = 'rdj',
@@ -20,16 +19,16 @@ async function reactTextImage(
   const image = await Jimp.read(path);
   const loadedImage = image;
   const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
-  const textImage = new Jimp(1280, 720, 0x0, (err) => {
+  const textImage = new Jimp(image.bitmap.width, image.bitmap.height, 0x0, (err) => {
     if (err) throw err;
   });
   textImage.print(font, xPos, yPos, text, maxWidth);
   textImage.color([{ apply: 'xor', params: [fontColour] }]);
   await loadedImage.blit(textImage, 0, 0)
-    .writeAsync(`/tmp/consubot/${message.id}.png`);
-  const tempImgId = message.id;
-  await message.editReply({ files: [`/tmp/consubot/${message.id}.png`] });
-  Fs.unlinkSync(`/tmp/consubot/${tempImgId}.png`);
+    .getBufferAsync(Jimp.MIME_PNG)
+    .then(async (imageBuffer) => {
+      await message.editReply({ files: [imageBuffer] });
+    });
 }
 
 async function reactText(interaction: CommandInteraction) {
