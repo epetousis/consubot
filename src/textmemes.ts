@@ -56,7 +56,7 @@ async function reactTextImage(
   await loadedImage.blit(textImage, 0, 0)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
-      const finalImage = new MessageAttachment(imageBuffer, `${imageDisc}.png`)
+      const finalImage = new MessageAttachment(imageBuffer, `${message.id}.png`)
         .setDescription(imageDisc);
       await message.editReply({ content: null, files: [finalImage] });
     });
