@@ -1,6 +1,7 @@
 import stream from 'stream';
 import { CommandInteraction } from 'discord.js';
 import ytdl from 'ytdl-core';
+import axios from 'axios';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   AudioPlayerStatus,
@@ -74,8 +75,12 @@ async function playJJJ(interaction: CommandInteraction) {
   player.on(AudioPlayerStatus.Idle, () => {
     connection.disconnect();
   });
+  const now = await axios({
+    method: 'GET',
+    url: 'https://music.abcradio.net.au/api/v1/plays/triplej/now.json',
+  });
 
-  interaction.editReply(`Playing triple j in <#${interaction.member.voice.channelId}>`);
+  interaction.editReply(`Playing ${now.data.now.recording.title} in <#${interaction.member.voice.channelId}>`);
 }
 
 export default function MusicCommands() {
