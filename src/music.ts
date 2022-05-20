@@ -27,6 +27,7 @@ async function play(interaction: CommandInteraction) {
 
   const url = interaction.options.getString('url');
   if (!url) return;
+  const videoInfo = await ytdl.getInfo(url);
   const video = ytdl(url, { quality: 'highestaudio' });
   const pass = new stream.PassThrough();
   video.pipe(pass);
@@ -44,6 +45,8 @@ async function play(interaction: CommandInteraction) {
     connection.disconnect();
     video.destroy();
   });
+  interaction.editReply(`Playing ${videoInfo.videoDetails.title} in <#${interaction.member.voice.channelId}>`);
+}
 
   interaction.editReply('Playing song in channel.');
 }
