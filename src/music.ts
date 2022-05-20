@@ -83,13 +83,15 @@ async function playJJJ(interaction: CommandInteraction) {
   });
 
   const { channelId } = interaction.member.voice;
-  const albumArt = await Jimp.read(now.data.now.release.artwork[0].url);
+  const albumArt = await Jimp.read(now.data.now.recording.releases[0].artwork[0].url);
   albumArt.resize(227, 227);
   const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
   const albumColour = await getAverageColor(albumArtBuffer);
   const nowPlayingImage = new Jimp(800, 240, albumColour.hex, (err) => {
     if (err) throw err;
   });
+  const largeFont = await Jimp.loadFont('assets/fonts/opensans48white.fnt');
+  const smallFont = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
   if (albumColour.isDark) {
     nowPlayingImage.color([
       { apply: 'lighten', params: [25] },
@@ -99,8 +101,11 @@ async function playJJJ(interaction: CommandInteraction) {
       { apply: 'darken', params: [25] },
     ]);
   }
+  const artistY = Jimp.measureTextHeight(largeFont, now.data.now.recording.title, 538);
   nowPlayingImage
     .blit(albumArt, 6, 6)
+    .print(largeFont, 255, 10, now.data.now.recording.title, 538)
+    .print(smallFont, 255, artistY + 20, now.data.now.recording.artists[0].name, 538)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
