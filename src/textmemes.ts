@@ -58,17 +58,24 @@ async function reactTextImage(
     .then(async (imageBuffer) => {
       const finalImage = new MessageAttachment(imageBuffer, `${imageDisc}.png`)
         .setDescription(imageDisc);
-      await message.editReply({ files: [finalImage] });
+      await message.editReply({ content: null, files: [finalImage] });
     });
 }
 
 async function reactText(interaction: CommandInteraction) {
-  await interaction.deferReply();
-
   const reactionImage = interaction.options.getString('meme') as ReactionImage | null;
   const reactionText = interaction.options.getString('text') as string;
   const bottomText = interaction.options.getString('text2') as string;
   const textArray: TextAttributes[] = [];
+
+  let imageText = '';
+  if (bottomText === null) {
+    imageText = reactionText;
+  } else {
+    imageText = `${reactionText} ${bottomText}`;
+  }
+
+  await interaction.reply(imageText);
 
   switch (reactionImage) {
     case ReactionImage.Rdj:
