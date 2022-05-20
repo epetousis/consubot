@@ -1,28 +1,65 @@
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, MessageAttachment } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Jimp from 'jimp';
-import Fs from 'fs';
 
 enum ReactionImage {
   Rdj = 'rdj',
+  Jesse = 'jesse',
+  Gus = 'gus',
 }
+
+interface TextObject {
+  text: string;
+  alignmentX: number;
+}
+
+interface TextAttributes {
+  xPos: number;
+  yPos: number;
+  maxWidth: number;
+  fontColour: string;
+  text: TextObject;
+}
+
+const emojiRegex = /\p{Extended_Pictographic}/ug;
 
 async function reactTextImage(
   message: CommandInteraction,
   path: string,
-  text: string,
-  xPos: number,
-  yPos: number,
-  maxWidth: number,
+  attr: TextAttributes[],
 ) {
+  let imageDisc = '';
+  if (attr.length !== 2) {
+    imageDisc = attr[0].text.text;
+  } else {
+    imageDisc = `${attr[0].text.text} ${attr[1].text.text}`;
+  }
   const image = await Jimp.read(path);
   const loadedImage = image;
   const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
-  await loadedImage.print(font, xPos, yPos, text, maxWidth)
-    .writeAsync(`/tmp/consubot/${message.id}.png`);
-  const tempImgId = message.id;
-  await message.editReply({ files: [`/tmp/consubot/${message.id}.png`] });
-  Fs.unlinkSync(`/tmp/consubot/${tempImgId}.png`);
+  const textImage = new Jimp(image.bitmap.width, image.bitmap.height, 0x0, (err) => {
+    if (err) throw err;
+  });
+  attr.forEach((textObject) => {
+    const tempImage = new Jimp(image.bitmap.width, image.bitmap.height, 0x0, (err) => {
+      if (err) throw err;
+    });
+    let newYPos = textObject.yPos;
+    if (textObject.yPos < 0) {
+      newYPos = -textObject.yPos
+       - Jimp.measureTextHeight(font, textObject.text.text, textObject.maxWidth);
+    }
+    tempImage.print(font, textObject.xPos, newYPos, textObject.text, textObject.maxWidth);
+    tempImage.color([{ apply: 'xor', params: [textObject.fontColour] }]);
+    textImage.blit(tempImage, 0, 0);
+  });
+  await loadedImage.blit(textImage, 0, 0)
+    .getBufferAsync(Jimp.MIME_PNG)
+    .then(async (imageBuffer) => {
+      const finalImage = new MessageAttachment(imageBuffer, `${imageDisc}.png`)
+        .setDescription(imageDisc);
+      await message.editReply({ files: [finalImage] });
+    });
 }
 
 async function reactText(interaction: CommandInteraction) {
@@ -30,10 +67,30 @@ async function reactText(interaction: CommandInteraction) {
 
   const reactionImage = interaction.options.getString('meme') as ReactionImage | null;
   const reactionText = interaction.options.getString('text') as string;
+  const bottomText = interaction.options.getString('text2') as string;
+  const textArray: TextAttributes[] = [];
 
   switch (reactionImage) {
     case ReactionImage.Rdj:
-      return reactTextImage(interaction, 'public/memes/rdj.png', reactionText, 69, 69, 434);
+      textArray.push({
+        xPos: 69, yPos: 69, maxWidth: 434, fontColour: '#000', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT },
+      });
+      return reactTextImage(interaction, 'public/memes/rdj.png', textArray);
+    case ReactionImage.Jesse:
+      textArray.push({
+        xPos: 0, yPos: -710, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      return reactTextImage(interaction, 'public/memes/jesse.png', textArray);
+    case ReactionImage.Gus:
+      textArray.push({
+        xPos: 12, yPos: 12, maxWidth: 680, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      if (bottomText != null) {
+        textArray.push({
+          xPos: 12, yPos: 860, maxWidth: 680, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        });
+      }
+      return reactTextImage(interaction, 'public/memes/gus.png', textArray);
     default:
       return null;
   }
@@ -43,14 +100,19 @@ export default function TextMemeCommands() {
   return [
     {
       handler: reactText,
-      data: new SlashCommandBuilder().setName('textreact').setDescription('Send a reaction image... with text')
+      data: new SlashCommandBuilder()
+        .setName('textreact')
+        .setDescription('Send a reaction image... with text')
         .addStringOption((option) => option.setName('meme')
           .setDescription('The reaction image to send.')
           .setRequired(true)
           .addChoices(Object.entries(ReactionImage)))
         .addStringOption((option) => option.setName('text')
           .setDescription('The text to be added to the image.')
-          .setRequired(true)),
+          .setRequired(true))
+        .addStringOption((option) => option.setName('text2')
+          .setDescription('The second text to be added (only applies for double lined memes)')
+          .setRequired(false)),
     },
   ];
 }
