@@ -5,6 +5,7 @@ import Jimp from 'jimp';
 enum ReactionImage {
   Rdj = 'rdj',
   Jesse = 'jesse',
+  Gus = 'gus',
 }
 
 interface TextObject {
@@ -25,14 +26,8 @@ const emojiRegex = /\p{Extended_Pictographic}/ug;
 async function reactTextImage(
   message: CommandInteraction,
   path: string,
-  text: TextObject,
-  xPos: number,
-  yPos: number,
-  maxWidth: number,
-  fontColour: string,
+  attr: TextAttributes[],
 ) {
-  const textNoEmoji = { text: '', alignmentX: text.alignmentX };
-  textNoEmoji.text = text.text.replaceAll(emojiRegex, '');
   const image = await Jimp.read(path);
   const loadedImage = image;
   const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
@@ -73,6 +68,16 @@ async function reactText(interaction: CommandInteraction) {
         xPos: 0, yPos: 600, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
       return reactTextImage(interaction, 'public/memes/jesse.png', textArray);
+    case ReactionImage.Gus:
+      textArray.push({
+        xPos: 12, yPos: 12, maxWidth: 680, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      if (bottomText != null) {
+        textArray.push({
+          xPos: 12, yPos: 860, maxWidth: 680, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        });
+      }
+      return reactTextImage(interaction, 'public/memes/gus.png', textArray);
     default:
       return null;
   }
