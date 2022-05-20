@@ -7,10 +7,17 @@ enum ReactionImage {
   Jesse = 'jesse',
 }
 
-class TextObject {
-  text!: string;
+interface TextObject {
+  text: string;
+  alignmentX: number;
+}
 
-  alignmentX: number | undefined;
+interface TextAttributes {
+  xPos: number;
+  yPos: number;
+  maxWidth: number;
+  fontColour: string;
+  text: TextObject;
 }
 
 const emojiRegex = /\p{Extended_Pictographic}/ug;
@@ -32,8 +39,14 @@ async function reactTextImage(
   const textImage = new Jimp(image.bitmap.width, image.bitmap.height, 0x0, (err) => {
     if (err) throw err;
   });
-  textImage.print(font, xPos, yPos, textNoEmoji, maxWidth);
-  textImage.color([{ apply: 'xor', params: [fontColour] }]);
+  attr.forEach((textObject) => {
+    const tempImage = new Jimp(image.bitmap.width, image.bitmap.height, 0x0, (err) => {
+      if (err) throw err;
+    });
+    tempImage.print(font, textObject.xPos, textObject.yPos, textObject.text, textObject.maxWidth);
+    tempImage.color([{ apply: 'xor', params: [textObject.fontColour] }]);
+    textImage.blit(tempImage, 0, 0);
+  });
   await loadedImage.blit(textImage, 0, 0)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
@@ -46,12 +59,20 @@ async function reactText(interaction: CommandInteraction) {
 
   const reactionImage = interaction.options.getString('meme') as ReactionImage | null;
   const reactionText = interaction.options.getString('text') as string;
+  const bottomText = interaction.options.getString('text2') as string;
+  const textArray: TextAttributes[] = [];
 
   switch (reactionImage) {
     case ReactionImage.Rdj:
-      return reactTextImage(interaction, 'public/memes/rdj.png', { text: reactionText, alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT }, 69, 69, 434, '#000');
+      textArray.push({
+        xPos: 69, yPos: 69, maxWidth: 434, fontColour: '#000', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT },
+      });
+      return reactTextImage(interaction, 'public/memes/rdj.png', textArray);
     case ReactionImage.Jesse:
-      return reactTextImage(interaction, 'public/memes/jesse.png', { text: reactionText, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER }, 0, 600, 1280, '#fff');
+      textArray.push({
+        xPos: 0, yPos: 600, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      return reactTextImage(interaction, 'public/memes/jesse.png', textArray);
     default:
       return null;
   }
@@ -61,14 +82,19 @@ export default function TextMemeCommands() {
   return [
     {
       handler: reactText,
-      data: new SlashCommandBuilder().setName('textreact').setDescription('Send a reaction image... with text')
+      data: new SlashCommandBuilder()
+        .setName('textreact')
+        .setDescription('Send a reaction image... with text')
         .addStringOption((option) => option.setName('meme')
           .setDescription('The reaction image to send.')
           .setRequired(true)
           .addChoices(Object.entries(ReactionImage)))
         .addStringOption((option) => option.setName('text')
           .setDescription('The text to be added to the image.')
-          .setRequired(true)),
+          .setRequired(true))
+        .addStringOption((option) => option.setName('text2')
+          .setDescription('The second text to be added (only applies for Gus)')
+          .setRequired(false)),
     },
   ];
 }
