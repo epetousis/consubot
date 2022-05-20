@@ -11,7 +11,7 @@ import {
 } from '@discordjs/voice';
 
 async function play(interaction: CommandInteraction) {
-  await interaction.deferReply();
+  await interaction.reply('Joining channel');
 
   if (!interaction.member
     || !('voice' in interaction.member)
@@ -52,8 +52,12 @@ export default function MusicCommands() {
   return [
     {
       handler: play,
-      data: new SlashCommandBuilder().setName('play')
-        .addStringOption((option) => option.setName('url').setDescription('URL of a video to play')),
+      data: new SlashCommandBuilder()
+        .setName('play')
+        .setDescription('Play music in voice channel')
+        .addStringOption((option) => option.setName('url')
+          .setDescription('URL of a video to play')
+          .setRequired(true)),
     },
   ];
 }
