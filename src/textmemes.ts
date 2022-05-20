@@ -65,7 +65,7 @@ async function reactText(interaction: CommandInteraction) {
       return reactTextImage(interaction, 'public/memes/rdj.png', textArray);
     case ReactionImage.Jesse:
       textArray.push({
-        xPos: 0, yPos: 600, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        xPos: 0, yPos: 500, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
       return reactTextImage(interaction, 'public/memes/jesse.png', textArray);
     case ReactionImage.Gus:
