@@ -1,4 +1,4 @@
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, MessageAttachment } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Jimp from 'jimp';
 
@@ -28,10 +28,11 @@ async function reactTextImage(
   path: string,
   attr: TextAttributes[],
 ) {
-  if (attr.length === 2) {
-    await message.editReply(`${attr[0].text.text} ${attr[1].text.text}`);
+  let imageDisc = '';
+  if (attr.length !== 2) {
+    imageDisc = attr[0].text.text;
   } else {
-    await message.editReply(attr[0].text.text);
+    imageDisc = `${attr[0].text.text} ${attr[1].text.text}`;
   }
   const image = await Jimp.read(path);
   const loadedImage = image;
@@ -55,7 +56,9 @@ async function reactTextImage(
   await loadedImage.blit(textImage, 0, 0)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
-      await message.editReply({ content: '', files: [imageBuffer] });
+      const finalImage = new MessageAttachment(imageBuffer, `${imageDisc}.png`)
+        .setDescription(imageDisc);
+      await message.editReply({ files: [finalImage] });
     });
 }
 
