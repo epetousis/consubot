@@ -24,10 +24,11 @@
     "discord-api-types": "^0.30.0",
     "discord.js": "^13.6.0",
     "express": "^4.17.1",
+    "ffmpeg-static": "^4.4.1",
     "jimp": "^0.16.1",
     "node-fetch": "^2.6.7",
     "parse-duration": "^1.0.0",
-    "ytdl-core": "^3.2.2"
+    "ytdl-core": "^4.11.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
