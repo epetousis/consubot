@@ -38,7 +38,12 @@ async function reactTextImage(
     const tempImage = new Jimp(image.bitmap.width, image.bitmap.height, 0x0, (err) => {
       if (err) throw err;
     });
-    tempImage.print(font, textObject.xPos, textObject.yPos, textObject.text, textObject.maxWidth);
+    let newYPos = textObject.yPos;
+    if (textObject.yPos < 0) {
+      newYPos = -textObject.yPos
+       - Jimp.measureTextHeight(font, textObject.text.text, textObject.maxWidth);
+    }
+    tempImage.print(font, textObject.xPos, newYPos, textObject.text, textObject.maxWidth);
     tempImage.color([{ apply: 'xor', params: [textObject.fontColour] }]);
     textImage.blit(tempImage, 0, 0);
   });
@@ -65,7 +70,7 @@ async function reactText(interaction: CommandInteraction) {
       return reactTextImage(interaction, 'public/memes/rdj.png', textArray);
     case ReactionImage.Jesse:
       textArray.push({
-        xPos: 0, yPos: 500, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        xPos: 0, yPos: -710, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
       return reactTextImage(interaction, 'public/memes/jesse.png', textArray);
     case ReactionImage.Gus:
