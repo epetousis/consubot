@@ -48,7 +48,34 @@ async function play(interaction: CommandInteraction) {
   interaction.editReply(`Playing ${videoInfo.videoDetails.title} in <#${interaction.member.voice.channelId}>`);
 }
 
-  interaction.editReply('Playing song in channel.');
+async function playJJJ(interaction: CommandInteraction) {
+  await interaction.reply('Joining channel');
+
+  if (!interaction.member
+    || !('voice' in interaction.member)
+    || !interaction.member?.voice.channelId) {
+    return;
+  }
+
+  const connection = joinVoiceChannel({
+    channelId: interaction.member.voice.channelId,
+    guildId: interaction.member.voice.guild.id,
+    adapterCreator: interaction.member.voice.guild.voiceAdapterCreator as any,
+  });
+  const player = createAudioPlayer();
+  const resource = createAudioResource('http://live-radio01.mediahubaustralia.com/2TJW/aac/');
+  player.play(resource);
+  connection.subscribe(player);
+
+  connection.on(VoiceConnectionStatus.Disconnected, () => {
+    interaction.editReply('I was just disconnected :(');
+  });
+
+  player.on(AudioPlayerStatus.Idle, () => {
+    connection.disconnect();
+  });
+
+  interaction.editReply(`Playing triple j in <#${interaction.member.voice.channelId}>`);
 }
 
 export default function MusicCommands() {
@@ -61,6 +88,12 @@ export default function MusicCommands() {
         .addStringOption((option) => option.setName('url')
           .setDescription('URL of a video to play')
           .setRequired(true)),
+    },
+    {
+      handler: playJJJ,
+      data: new SlashCommandBuilder()
+        .setName('playtriplej')
+        .setDescription('Play triple j live radio in a voice channel'),
     },
   ];
 }
