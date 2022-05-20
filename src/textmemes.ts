@@ -28,6 +28,11 @@ async function reactTextImage(
   path: string,
   attr: TextAttributes[],
 ) {
+  if (attr.length === 2) {
+    await message.editReply(`${attr[0].text.text} ${attr[1].text.text}`);
+  } else {
+    await message.editReply(attr[0].text.text);
+  }
   const image = await Jimp.read(path);
   const loadedImage = image;
   const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
@@ -50,7 +55,7 @@ async function reactTextImage(
   await loadedImage.blit(textImage, 0, 0)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
-      await message.editReply({ files: [imageBuffer] });
+      await message.editReply({ content: '', files: [imageBuffer] });
     });
 }
 
