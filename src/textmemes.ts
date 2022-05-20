@@ -98,7 +98,7 @@ export default function TextMemeCommands() {
           .setDescription('The text to be added to the image.')
           .setRequired(true))
         .addStringOption((option) => option.setName('text2')
-          .setDescription('The second text to be added (only applies for Gus)')
+          .setDescription('The second text to be added (only applies for double lined memes)')
           .setRequired(false)),
     },
   ];
