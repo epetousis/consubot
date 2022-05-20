@@ -94,7 +94,7 @@ async function reactText(interaction: CommandInteraction) {
       });
       if (bottomText != null) {
         textArray.push({
-          xPos: 12, yPos: 860, maxWidth: 680, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+          xPos: 12, yPos: -12, maxWidth: 680, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
         });
       }
       return reactTextImage(interaction, 'public/memes/gus.png', textArray);
