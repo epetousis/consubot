@@ -1,7 +1,9 @@
 import stream from 'stream';
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, MessageAttachment } from 'discord.js';
 import ytdl from 'ytdl-core';
 import axios from 'axios';
+import Jimp from 'jimp';
+import { getAverageColor } from 'fast-average-color-node';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   AudioPlayerStatus,
@@ -80,7 +82,31 @@ async function playJJJ(interaction: CommandInteraction) {
     url: 'https://music.abcradio.net.au/api/v1/plays/triplej/now.json',
   });
 
-  interaction.editReply(`Playing ${now.data.now.recording.title} in <#${interaction.member.voice.channelId}>`);
+  const { channelId } = interaction.member.voice;
+  const albumArt = await Jimp.read(now.data.now.release.artwork[0].url);
+  albumArt.resize(227, 227);
+  const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
+  const albumColour = await getAverageColor(albumArtBuffer);
+  const nowPlayingImage = new Jimp(800, 240, albumColour.hex, (err) => {
+    if (err) throw err;
+  });
+  if (albumColour.isDark) {
+    nowPlayingImage.color([
+      { apply: 'lighten', params: [25] },
+    ]);
+  } else if (albumColour.isLight) {
+    nowPlayingImage.color([
+      { apply: 'darken', params: [25] },
+    ]);
+  }
+  nowPlayingImage
+    .blit(albumArt, 6, 6)
+    .getBufferAsync(Jimp.MIME_PNG)
+    .then(async (imageBuffer) => {
+      const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
+        .setDescription(`Now playing: ${now.data.now.recording.title}`);
+      await interaction.editReply({ content: `Playing ${now.data.now.recording.title} in <#${channelId}>`, files: [image] });
+    });
 }
 
 export default function MusicCommands() {
