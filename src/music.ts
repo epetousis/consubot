@@ -173,7 +173,7 @@ async function playJJJ(interaction: CommandInteraction) {
     .blit(nowPlayingProgressBg, 255, 165)
     .print(largeFont, 255, 10, songInfo.title, 538)
     .print(smallFont, 255, artistY + 20, songInfo.artist, 538)
-    .print(evenSmallerFont, 255, 200, `${progressMinutes}:${progressSeconds} / ${totalMinutes}:${totalSeconds}`)
+    .print(evenSmallerFont, 255, 200, `${progressMinutes}:${String(progressSeconds.toString()).padStart(2, '0')} / ${totalMinutes}:${String(totalSeconds.toString()).padStart(2, '0')}`)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
