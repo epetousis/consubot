@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "patch-package",
     "deploy-commands": "node ./dist/deploy-commands.js",
     "lint-and-compile": "eslint . && tsc",
     "build": "npm run lint-and-compile && npm run deploy-commands",
@@ -22,9 +23,10 @@
     "discord-api-types": "^0.30.0",
     "discord.js": "^13.6.0",
     "express": "^4.17.1",
-    "jimp": "^0.16.1",
+    "jimp": "0.16.1",
     "node-fetch": "^2.6.7",
-    "parse-duration": "^1.0.0"
+    "parse-duration": "^1.0.0",
+    "patch-package": "^6.4.7"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",

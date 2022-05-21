@@ -1,0 +1,15 @@
+diff --git a/node_modules/@jimp/plugin-color/index.d.ts b/node_modules/@jimp/plugin-color/index.d.ts
+index c2f897a..f60a4ac 100644
+--- a/node_modules/@jimp/plugin-color/index.d.ts
++++ b/node_modules/@jimp/plugin-color/index.d.ts
+@@ -8,7 +8,9 @@ type ColorActionName =
+   | 'red'
+   | 'green'
+   | 'blue'
+-  | 'hue';
++  | 'hue'
++  | 'lighten'
++  | 'darken';
+ 
+ type ColorAction = {
+   apply: ColorActionName;
