@@ -51,6 +51,18 @@ async function play(interaction: CommandInteraction) {
   interaction.editReply(`Playing ${videoInfo.videoDetails.title} in <#${interaction.member.voice.channelId}>`);
 }
 
+async function getJJJAlbumArt(nowJSON: Record<string, any>) {
+  switch (nowJSON) {
+    case (nowJSON.now):
+      switch (nowJSON.now) {
+        default:
+          return 'assets/images/unknownart.png';
+      }
+    default:
+      return 'assets/images/unknownart.png';
+  }
+}
+
 async function playJJJ(interaction: CommandInteraction) {
   await interaction.reply('Joining channel');
 
@@ -83,7 +95,9 @@ async function playJJJ(interaction: CommandInteraction) {
   });
 
   const { channelId } = interaction.member.voice;
-  const albumArt = await Jimp.read(now.data.now.recording.releases[0].artwork[0].url);
+  const albumArtPath = await getJJJAlbumArt(now.data);
+  const albumArt = await Jimp.read(albumArtPath);
+  // now.data.now.recording.releases[0].artwork[0].url);
   albumArt.resize(227, 227);
   const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
   const albumColour = await getAverageColor(albumArtBuffer);
