@@ -128,11 +128,10 @@ async function playJJJ(interaction: CommandInteraction) {
   albumArt.resize(227, 227);
   const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
   const albumColour = await getAverageColor(albumArtBuffer);
-  const nowPlayingImage = new Jimp(800, 240, albumColour.hex, (err) => {
-    if (err) throw err;
-  });
+  const nowPlayingImage = new Jimp(800, 240, albumColour.hex);
   const largeFont = await Jimp.loadFont('assets/fonts/opensans48white.fnt');
   const smallFont = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
+  const evenSmallerFont = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
   if (albumColour.isDark) {
     nowPlayingImage.color([
       { apply: 'lighten', params: [25] },
@@ -142,16 +141,44 @@ async function playJJJ(interaction: CommandInteraction) {
       { apply: 'darken', params: [25] },
     ]);
   }
-  const artistY = Jimp.measureTextHeight(largeFont, now.data.now.recording.title, 538);
+  const artistY = Jimp.measureTextHeight(largeFont, songInfo.title, 538);
+  const progressColours = ['#dfe6e9', '#636e72'];
+  if (albumColour.isLight) {
+    progressColours.splice(1, 1, progressColours.splice(0, 1)[0]);
+  }
+  const nowPlayingProgressBg = new Jimp(523, 25, progressColours[0]);
+  const datePlayed = new Date(songInfo.airTime);
+  const dateNow = new Date();
+  const totalMinutes = Math.floor(songInfo.duration / 60);
+  const totalSeconds = (songInfo.duration % 60);
+  const progress = (dateNow.getTime() - datePlayed.getTime()) / 1000;
+  const progressMinutes = Math.floor(progress / 60);
+  const progressSeconds = Math.floor(progress % 60);
+  let progressPercent = (progress / songInfo.duration);
+  if (progressPercent > 1) {
+    progressPercent = 1;
+  }
+  const barWidth = Math.floor(progressPercent * 513);
+  const nowPlayingProgress = new Jimp(barWidth, 15, progressColours[1]);
+  const nowPlayingProgressBgMask = await Jimp.read('assets/images/progressmaskbg.png');
+  const nowPlayingProgressMask = await Jimp.read('assets/images/progressmask.png');
+  nowPlayingProgress
+    .mask(nowPlayingProgressMask, 0, 0)
+    .mask(nowPlayingProgressMask, -513 - -barWidth, 0);
+  nowPlayingProgressBg
+    .mask(nowPlayingProgressBgMask, 0, 0)
+    .blit(nowPlayingProgress, 5, 5);
   nowPlayingImage
     .blit(albumArt, 6, 6)
+    .blit(nowPlayingProgressBg, 255, 165)
     .print(largeFont, 255, 10, songInfo.title, 538)
     .print(smallFont, 255, artistY + 20, songInfo.artist, 538)
+    .print(evenSmallerFont, 255, 200, `${progressMinutes}:${progressSeconds} / ${totalMinutes}:${totalSeconds}`)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
-        .setDescription(`Now playing: ${now.data.now.recording.title}`);
-      await interaction.editReply({ content: `Playing ${now.data.now.recording.title} in <#${channelId}>`, files: [image] });
+        .setDescription(`Now playing: ${songInfo.title}`);
+      await interaction.editReply({ content: `Playing ${songInfo.title} in <#${channelId}>`, files: [image] });
     });
 }
 
