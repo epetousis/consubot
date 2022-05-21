@@ -13,6 +13,13 @@ import {
   VoiceConnectionStatus,
 } from '@discordjs/voice';
 
+interface SongInfo {
+  title: string,
+  artist: string,
+  duration: number,
+  airTime: Date,
+}
+
 async function play(interaction: CommandInteraction) {
   await interaction.reply('Joining channel');
 
@@ -51,16 +58,37 @@ async function play(interaction: CommandInteraction) {
   interaction.editReply(`Playing ${videoInfo.videoDetails.title} in <#${interaction.member.voice.channelId}>`);
 }
 
-async function getJJJAlbumArt(nowJSON: Record<string, any>) {
-  switch (nowJSON) {
-    case (nowJSON.now):
-      switch (nowJSON.now) {
-        default:
-          return 'assets/images/unknownart.png';
+async function getJJJAlbumArt(nowJSON: Record<string, any>): Promise<string> {
+  if (Object.keys(nowJSON.now).length === 0) {
+    return getJJJAlbumArt({ now: nowJSON.prev });
+  } if (nowJSON.now.recording.releases.length !== 0) {
+    if (nowJSON.now.recording.releases[0].artwork.length !== 0) {
+      return nowJSON.now.recording.releases[0].artwork[0].url;
+    } if (nowJSON.now.recording.releases.length > 1) {
+      if (nowJSON.now.recording.releases[1].artwork.length !== 0) {
+        return nowJSON.now.recording.releases[1].artwork[0].url;
       }
-    default:
-      return 'assets/images/unknownart.png';
+    }
+  } else if (nowJSON.now.recording.artwork !== 0) {
+    return nowJSON.now.recording.artwork[0].url;
+  } else if (Object.keys(nowJSON.now.release).length !== 0) {
+    if (nowJSON.now.release.artwork.length !== 0) {
+      return nowJSON.now.release.artwork[0].url;
+    }
   }
+  return 'assets/images/unknownart.png';
+}
+
+async function getJJJSongInfo(nowJSON: Record<string, any>): Promise<SongInfo> {
+  if (Object.keys(nowJSON.now).length === 0) {
+    return getJJJSongInfo({ now: nowJSON.prev });
+  }
+  return {
+    title: nowJSON.now.recording.title,
+    artist: nowJSON.now.recording.artists[0].name,
+    duration: nowJSON.now.recording.duration,
+    airTime: new Date(nowJSON.now.played_time),
+  };
 }
 
 async function playJJJ(interaction: CommandInteraction) {
@@ -95,9 +123,8 @@ async function playJJJ(interaction: CommandInteraction) {
   });
 
   const { channelId } = interaction.member.voice;
-  const albumArtPath = await getJJJAlbumArt(now.data);
-  const albumArt = await Jimp.read(albumArtPath);
-  // now.data.now.recording.releases[0].artwork[0].url);
+  const albumArt = await Jimp.read(await getJJJAlbumArt(now.data));
+  const songInfo = await getJJJSongInfo(now.data);
   albumArt.resize(227, 227);
   const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
   const albumColour = await getAverageColor(albumArtBuffer);
@@ -118,8 +145,8 @@ async function playJJJ(interaction: CommandInteraction) {
   const artistY = Jimp.measureTextHeight(largeFont, now.data.now.recording.title, 538);
   nowPlayingImage
     .blit(albumArt, 6, 6)
-    .print(largeFont, 255, 10, now.data.now.recording.title, 538)
-    .print(smallFont, 255, artistY + 20, now.data.now.recording.artists[0].name, 538)
+    .print(largeFont, 255, 10, songInfo.title, 538)
+    .print(smallFont, 255, artistY + 20, songInfo.artist, 538)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
