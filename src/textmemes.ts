@@ -6,6 +6,7 @@ enum ReactionImage {
   Rdj = 'rdj',
   Jesse = 'jesse',
   Gus = 'gus',
+  Bugs = 'bugs',
 }
 
 interface TextObject {
@@ -98,6 +99,16 @@ async function reactText(interaction: CommandInteraction) {
         });
       }
       return reactTextImage(interaction, 'public/memes/gus.png', textArray);
+    case ReactionImage.Bugs:
+      textArray.push({
+        xPos: 35, yPos: 100, maxWidth: 370, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      if (bottomText != null) {
+        textArray.push({
+          xPos: 35, yPos: 305, maxWidth: 370, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        });
+      }
+      return reactTextImage(interaction, 'public/memes/bugs.jpg', textArray);
     default:
       return null;
   }
