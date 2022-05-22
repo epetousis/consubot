@@ -26,6 +26,7 @@ async function play(interaction: CommandInteraction) {
   if (!interaction.member
     || !('voice' in interaction.member)
     || !interaction.member?.voice.channelId) {
+    interaction.editReply('You\'re not in a voice channel!');
     return;
   }
 
@@ -45,7 +46,6 @@ async function play(interaction: CommandInteraction) {
   const resource = createAudioResource(pass);
   player.play(resource);
   connection.subscribe(player);
-
   connection.on(VoiceConnectionStatus.Disconnected, () => {
     video.destroy();
     interaction.editReply('I was just disconnected :(');
