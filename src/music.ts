@@ -111,7 +111,7 @@ async function playJJJ(interaction: CommandInteraction) {
   connection.subscribe(player);
 
   connection.on(VoiceConnectionStatus.Disconnected, () => {
-    interaction.editReply('I was just disconnected :(');
+    interaction.editReply({ content: 'I was just disconnected :(', files: [] });
   });
 
   player.on(AudioPlayerStatus.Idle, () => {
