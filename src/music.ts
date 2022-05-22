@@ -97,6 +97,7 @@ async function playJJJ(interaction: CommandInteraction) {
   if (!interaction.member
     || !('voice' in interaction.member)
     || !interaction.member?.voice.channelId) {
+    interaction.reply('You\'re not in a voice channel!');
     return;
   }
 
