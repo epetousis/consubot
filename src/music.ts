@@ -106,7 +106,8 @@ async function playJJJ(interaction: CommandInteraction) {
     adapterCreator: interaction.member.voice.guild.voiceAdapterCreator as any,
   });
   const player = createAudioPlayer();
-  const resource = createAudioResource('http://live-radio01.mediahubaustralia.com/2TJW/aac/');
+  // https://abcradiolivehls-lh.akamaihd.net/i/triplejnsw_1@327300/master.m3u8 or http://live-radio01.mediahubaustralia.com/2TJW/aac/
+  const resource = createAudioResource('https://abcradiolivehls-lh.akamaihd.net/i/triplejnsw_1@327300/master.m3u8');
   player.play(resource);
   connection.subscribe(player);
 
