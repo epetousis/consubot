@@ -92,7 +92,7 @@ async function getJJJSongInfo(nowJSON: Record<string, any>): Promise<SongInfo> {
 }
 
 async function playJJJ(interaction: CommandInteraction) {
-  await interaction.reply('Joining channel');
+  await interaction.reply({ content: 'Joining channel', ephemeral: true });
 
   if (!interaction.member
     || !('voice' in interaction.member)
