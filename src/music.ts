@@ -112,8 +112,10 @@ async function playJJJ(interaction: CommandInteraction) {
   player.play(resource);
   connection.subscribe(player);
 
+  let followUp: any;
+
   connection.on(VoiceConnectionStatus.Disconnected, () => {
-    interaction.editReply({ content: 'I was just disconnected :(', files: [] });
+    followUp.edit({ content: 'I was just disconnected :(', files: [] });
   });
 
   player.on(AudioPlayerStatus.Idle, () => {
@@ -180,7 +182,7 @@ async function playJJJ(interaction: CommandInteraction) {
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
         .setDescription(`Now playing: ${songInfo.title}`);
-      await interaction.editReply({ content: `Playing ${songInfo.title} in <#${channelId}>`, files: [image] });
+      followUp = await interaction.followUp({ content: `Playing ${songInfo.title} in <#${channelId}>`, files: [image] });
     });
 }
 
