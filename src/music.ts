@@ -69,7 +69,7 @@ async function getJJJAlbumArt(nowJSON: Record<string, any>): Promise<string> {
         return nowJSON.now.recording.releases[1].artwork[0].url;
       }
     }
-  } else if (nowJSON.now.recording.artwork !== 0) {
+  } else if (nowJSON.now.recording.artwork.length !== 0) {
     return nowJSON.now.recording.artwork[0].url;
   } else if (Object.keys(nowJSON.now.release).length !== 0) {
     if (nowJSON.now.release.artwork.length !== 0) {
