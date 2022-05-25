@@ -69,6 +69,10 @@ async function play(interaction: CommandInteraction) {
   const thumbUrl = `https://i.ytimg.com/vi/${videoInfo.videoDetails.videoId}/maxresdefault.jpg`;
   const albumArt = await Jimp.read(thumbUrl);
   albumArt.cover(227, 227);
+  const avatar = await Jimp.read(interaction.member.displayAvatarURL({ format: 'png' }));
+  avatar
+    .resize(46, 46)
+    .circle();
   const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
   const albumColour = await getAverageColor(albumArtBuffer);
   const nowPlayingImage = new Jimp(800, 240, albumColour.hex);
@@ -77,6 +81,8 @@ async function play(interaction: CommandInteraction) {
     .print(largeFont, 255, 10, videoInfo.videoDetails.title, 538)
     .print(smallFont, 255, artistY + 20, videoInfo.videoDetails.author.name, 538)
     .print(evenSmallerFont, 255, 200, '0:00 / 0:00')
+    .print(evenSmallerFont, 350, 200, { text: `Requested by ${interaction.member.displayName}`, alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT }, 380)
+    .blit(avatar, 732, 192)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
@@ -161,6 +167,10 @@ async function playJJJ(interaction: CommandInteraction) {
   const albumArt = await Jimp.read(await getJJJAlbumArt(now.data));
   const songInfo = await getJJJSongInfo(now.data);
   albumArt.resize(227, 227);
+  const avatar = await Jimp.read(interaction.member.displayAvatarURL({ format: 'png' }));
+  avatar
+    .resize(46, 46)
+    .circle();
   const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
   const albumColour = await getAverageColor(albumArtBuffer);
   const nowPlayingImage = new Jimp(800, 240, albumColour.hex);
@@ -209,6 +219,8 @@ async function playJJJ(interaction: CommandInteraction) {
     .print(largeFont, 255, 10, songInfo.title, 538)
     .print(smallFont, 255, artistY + 20, songInfo.artist, 538)
     .print(evenSmallerFont, 255, 200, `${progressMinutes}:${String(progressSeconds.toString()).padStart(2, '0')} / ${totalMinutes}:${String(totalSeconds.toString()).padStart(2, '0')}`)
+    .print(evenSmallerFont, 350, 200, { text: `Requested by ${interaction.member.displayName}`, alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT }, 380)
+    .blit(avatar, 732, 192)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
