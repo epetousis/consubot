@@ -21,7 +21,7 @@ interface SongInfo {
 }
 
 async function play(interaction: CommandInteraction) {
-  await interaction.reply('Joining channel');
+  await interaction.reply({ content: 'Joining channel', ephemeral: true });
 
   if (!interaction.member
     || !('voice' in interaction.member)
@@ -36,6 +36,8 @@ async function play(interaction: CommandInteraction) {
     adapterCreator: interaction.member.voice.guild.voiceAdapterCreator as any,
   });
 
+  let followUp: any;
+
   const url = interaction.options.getString('url');
   if (!url) return;
   const videoInfo = await ytdl.getInfo(url);
@@ -48,14 +50,15 @@ async function play(interaction: CommandInteraction) {
   connection.subscribe(player);
   connection.on(VoiceConnectionStatus.Disconnected, () => {
     video.destroy();
-    interaction.editReply('I was just disconnected :(');
+    followUp.edit({ content: 'I was just disconnected :(', files: [] });
   });
 
   player.on(AudioPlayerStatus.Idle, () => {
     connection.disconnect();
     video.destroy();
+    followUp.edit({ content: 'End of tracks. Thanks for listening!', files: [] });
   });
-  interaction.editReply(`Playing ${videoInfo.videoDetails.title} in <#${interaction.member.voice.channelId}>`);
+  followUp = await interaction.followUp({ content: `Playing ${videoInfo.videoDetails.title} in <#${interaction.member.voice.channelId}>`, files: [] });
 }
 
 async function getJJJAlbumArt(nowJSON: Record<string, any>): Promise<string> {
