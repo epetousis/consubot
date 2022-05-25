@@ -176,7 +176,7 @@ async function playJJJ(interaction: CommandInteraction) {
   const nowPlayingImage = new Jimp(800, 240, albumColour.hex);
   const largeFont = await Jimp.loadFont('assets/fonts/opensans48white.fnt');
   const smallFont = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
-  const evenSmallerFont = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
+  const evenSmallerFont = await Jimp.loadFont('assets/fonts/opensans24white.fnt');
   if (albumColour.isDark) {
     nowPlayingImage.color([
       { apply: 'lighten', params: [25] },
@@ -218,8 +218,8 @@ async function playJJJ(interaction: CommandInteraction) {
     .blit(nowPlayingProgressBg, 255, 165)
     .print(largeFont, 255, 10, songInfo.title, 538)
     .print(smallFont, 255, artistY + 20, songInfo.artist, 538)
-    .print(evenSmallerFont, 255, 200, `${progressMinutes}:${String(progressSeconds.toString()).padStart(2, '0')} / ${totalMinutes}:${String(totalSeconds.toString()).padStart(2, '0')}`)
-    .print(evenSmallerFont, 350, 200, { text: `Requested by ${interaction.member.displayName}`, alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT }, 380)
+    .print(evenSmallerFont, 255, 205, `${progressMinutes}:${String(progressSeconds.toString()).padStart(2, '0')} / ${totalMinutes}:${String(totalSeconds.toString()).padStart(2, '0')}`)
+    .print(evenSmallerFont, 350, 205, { text: `Requested by ${interaction.member.displayName}`, alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT }, 380)
     .blit(avatar, 732, 192)
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
