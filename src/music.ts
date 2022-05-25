@@ -58,7 +58,28 @@ async function play(interaction: CommandInteraction) {
     video.destroy();
     followUp.edit({ content: 'End of tracks. Thanks for listening!', files: [] });
   });
-  followUp = await interaction.followUp({ content: `Playing ${videoInfo.videoDetails.title} in <#${interaction.member.voice.channelId}>`, files: [] });
+  const { channelId } = interaction.member.voice;
+  const largeFont = await Jimp.loadFont('assets/fonts/opensans48white.fnt');
+  const smallFont = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
+  const evenSmallerFont = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
+  const artistY = Jimp.measureTextHeight(largeFont, videoInfo.videoDetails.title, 538);
+  const thumbUrl = `https://i.ytimg.com/vi/${videoInfo.videoDetails.videoId}/maxresdefault.jpg`;
+  const albumArt = await Jimp.read(thumbUrl);
+  albumArt.cover(227, 227);
+  const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
+  const albumColour = await getAverageColor(albumArtBuffer);
+  const nowPlayingImage = new Jimp(800, 240, albumColour.hex);
+  nowPlayingImage
+    .blit(albumArt, 6, 6)
+    .print(largeFont, 255, 10, videoInfo.videoDetails.title, 538)
+    .print(smallFont, 255, artistY + 20, videoInfo.videoDetails.author.name, 538)
+    .print(evenSmallerFont, 255, 200, '0:00 / 0:00')
+    .getBufferAsync(Jimp.MIME_PNG)
+    .then(async (imageBuffer) => {
+      const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
+        .setDescription(`Now playing: ${videoInfo.videoDetails.title}`);
+      followUp = await interaction.followUp({ content: `Playing ${videoInfo.videoDetails.title} in <#${channelId}>`, files: [image] });
+    });
 }
 
 async function getJJJAlbumArt(nowJSON: Record<string, any>): Promise<string> {
