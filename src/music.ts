@@ -48,6 +48,9 @@ async function play(interaction: CommandInteraction) {
   const resource = createAudioResource(pass);
   player.play(resource);
   connection.subscribe(player);
+  connection.on(VoiceConnectionStatus.Ready, () => {
+    interaction.editReply('Connected!');
+  });
   connection.on(VoiceConnectionStatus.Disconnected, () => {
     video.destroy();
     followUp.edit({ content: 'I was just disconnected :(', files: [] });
@@ -137,6 +140,10 @@ async function playJJJ(interaction: CommandInteraction) {
   connection.subscribe(player);
 
   let followUp: any;
+
+  connection.on(VoiceConnectionStatus.Ready, () => {
+    interaction.editReply('Connected!');
+  });
 
   connection.on(VoiceConnectionStatus.Disconnected, () => {
     followUp.edit({ content: 'I was just disconnected :(', files: [] });
