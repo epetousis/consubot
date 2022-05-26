@@ -190,7 +190,7 @@ async function playJJJ(interaction: CommandInteraction) {
       { apply: 'darken', params: [25] },
     ]);
   }
-  const artistY = Jimp.measureTextHeight(largeFont, songInfo.title, 538);
+  const artistY = Jimp.measureTextHeight(largeFont, songInfo.title.substring(0, 22), 538);
   const progressColours = ['#dfe6e9', '#636e72'];
   if (albumColour.isLight) {
     progressColours.splice(1, 1, progressColours.splice(0, 1)[0]);
@@ -229,7 +229,7 @@ async function playJJJ(interaction: CommandInteraction) {
     .then(async (imageBuffer) => {
       const image = new MessageAttachment(imageBuffer, `${interaction.id}.png`)
         .setDescription(`Now playing: ${songInfo.title}`);
-      followUp = await interaction.followUp({ content: `Playing ${songInfo.title} in <#${channelId}>`, files: [image] });
+      followUp = await interaction.followUp({ content: `Playing ${songInfo.title.substring(0, 22)} in <#${channelId}>`, files: [image] });
     });
 }
 
