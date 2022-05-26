@@ -80,11 +80,33 @@ async function play(interaction: CommandInteraction) {
   const albumArtBuffer = await albumArt.getBufferAsync(Jimp.MIME_PNG);
   const albumColour = await getAverageColor(albumArtBuffer);
   const nowPlayingImage = new Jimp(800, 240, albumColour.hex);
+  let progressPercent = (1 / parseInt(videoInfo.videoDetails.lengthSeconds, 10));
+  if (progressPercent > 1) {
+    progressPercent = 1;
+  }
+  const barWidth = Math.floor(progressPercent * 513);
+  const progressColours = ['#dfe6e9', '#636e72'];
+  if (albumColour.isLight) {
+    progressColours.splice(1, 1, progressColours.splice(0, 1)[0]);
+  }
+  const totalMinutes = Math.floor(parseInt(videoInfo.videoDetails.lengthSeconds, 10) / 60);
+  const totalSeconds = (parseInt(videoInfo.videoDetails.lengthSeconds, 10) % 60);
+  const nowPlayingProgress = new Jimp(barWidth, 15, progressColours[1]);
+  const nowPlayingProgressBg = new Jimp(523, 25, progressColours[0]);
+  const nowPlayingProgressBgMask = await Jimp.read('assets/images/progressmaskbg.png');
+  const nowPlayingProgressMask = await Jimp.read('assets/images/progressmask.png');
+  nowPlayingProgress
+    .mask(nowPlayingProgressMask, 0, 0)
+    .mask(nowPlayingProgressMask, -513 - -barWidth, 0);
+  nowPlayingProgressBg
+    .mask(nowPlayingProgressBgMask, 0, 0)
+    .blit(nowPlayingProgress, 5, 5);
   nowPlayingImage
     .blit(albumArt, 6, 6)
+    .blit(nowPlayingProgressBg, 255, 165)
     .print(largeFont, 255, 10, videoInfo.videoDetails.title.substring(0, 22), 538)
     .print(smallFont, 255, artistY + 20, videoInfo.videoDetails.author.name, 538)
-    .print(evenSmallerFont, 255, 200, '0:00 / 0:00')
+    .print(evenSmallerFont, 255, 205, `0:00 / ${totalMinutes}:${String(totalSeconds.toString()).padStart(2, '0')}`)
     .print(evenSmallerFont, 350, 200, { text: `Requested by ${interaction.member.displayName}`, alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT }, 380)
     .blit(avatar, 732, 192)
     .getBufferAsync(Jimp.MIME_PNG)
