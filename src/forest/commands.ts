@@ -4,8 +4,10 @@ import {
   MessageActionRow,
   MessageButton,
   MessageEmbed,
+  MessageAttachment,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
+import QRCode from 'qrcode';
 import Forest from './Forest';
 
 const BOT_TOKEN = process.env.FOREST_BOT_TOKEN ?? '';
@@ -63,6 +65,11 @@ async function forest(interaction: CommandInteraction) {
   //       .setStyle('DANGER'),
   //   );
 
+  const qrCodeImageAttachment = new MessageAttachment(
+    await QRCode.toBuffer(`forest://join_room?token=${room.roomToken}`),
+    'forest_qrcode.png',
+  );
+
   const updateRoomMessage = async () => {
     const roomUpdated = await room.queryRoom();
     if (roomUpdated) {
@@ -93,10 +100,16 @@ async function forest(interaction: CommandInteraction) {
         .addFields(fields)
         .setFooter({ text: 'This information updates every 15 seconds. Custom trees are unfortunately not supported.' });
 
+      if (!room.endTime) {
+        // If the room hasn't started yet, attach our QR code
+        embed.setImage('attachment://forest_qrcode.png');
+      }
+
       if (!room.isSuccess) {
         await message.edit({
           content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.',
           embeds: [],
+          files: [],
           components: [],
         });
 
@@ -106,7 +119,12 @@ async function forest(interaction: CommandInteraction) {
       }
 
       if (room.treeHasGrown) {
-        await message.edit({ content: 'Tree has grown!', embeds: [], components: [] });
+        await message.edit({
+          content: 'Tree has grown!',
+          embeds: [],
+          files: [],
+          components: [],
+        });
 
         await cleanUpRoom(room.roomToken);
 
@@ -116,6 +134,7 @@ async function forest(interaction: CommandInteraction) {
       await message.edit({
         content: null,
         embeds: [embed],
+        files: qrCodeImageAttachment ? [qrCodeImageAttachment] : undefined,
         components: actionRow ? [actionRow] : [],
       });
     } else {
@@ -150,7 +169,12 @@ async function leaveRoomButton(interaction: ButtonInteraction) {
   const left = await room.leaveRoom();
   clearInterval(room.roomUpdateTimer);
   if (left) {
-    await interaction.update({ content: 'Room cancelled.', embeds: [], components: [] });
+    await interaction.update({
+      content: 'Room cancelled.',
+      embeds: [],
+      files: [],
+      components: [],
+    });
   } else {
     await interaction.reply({ content: "Couldn't leave and cancel the room.", ephemeral: true });
   }
@@ -173,7 +197,7 @@ async function plantTreeButton(interaction: ButtonInteraction) {
   const { room } = roomData;
   const started = await room.startTree();
   if (started) {
-    await interaction.update({ content: 'Started room. The information will update in just a moment.', components: [] });
+    await interaction.update({ content: 'Started room. The information will update in just a moment.', files: [], components: [] });
   } else {
     await interaction.reply({ content: "Couldn't start timer. Not enough people in your room?", ephemeral: true });
   }
@@ -196,7 +220,12 @@ async function cancelButton(interaction: ButtonInteraction) {
   const ended = await room.endTree();
   clearInterval(room.roomUpdateTimer);
   if (ended) {
-    await interaction.update({ content: 'Killed tree.', embeds: [], components: [] });
+    await interaction.update({
+      content: 'Killed tree.',
+      embeds: [],
+      files: [],
+      components: [],
+    });
   } else {
     await interaction.reply({ content: "Couldn't kill tree.", ephemeral: true });
   }

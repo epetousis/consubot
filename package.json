@@ -26,12 +26,14 @@
     "jimp": "0.16.1",
     "node-fetch": "^2.6.7",
     "parse-duration": "^1.0.0",
-    "patch-package": "^6.4.7"
+    "patch-package": "^6.4.7",
+    "qrcode": "^1.5.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.23",
     "@types/node-fetch": "^2.6.1",
+    "@types/qrcode": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "eslint": "^8.12.0",
