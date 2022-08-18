@@ -18,7 +18,7 @@ export default class BaseForest {
           cookie: `remember_token=${this.token}`,
           'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
         },
-        body: JSON.stringify(body),
+        body: body ? JSON.stringify(body) : undefined,
       },
     );
 
