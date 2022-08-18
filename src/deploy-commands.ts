@@ -5,7 +5,7 @@ import FightCommands from './fight';
 import TimerCommands from './timer';
 import MemeCommands from './memes';
 import UtilCommands from './util';
-import ForestCommands from './forest';
+import ForestCommands from './forest/commands';
 import TextMemeCommands from './textmemes';
 
 const clientId = process.env.BOT_CLIENT_ID ?? '';

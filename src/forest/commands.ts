@@ -6,128 +6,19 @@ import {
   MessageEmbed,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import fetch from 'node-fetch';
+import Forest from './Forest';
 
 const BOT_TOKEN = process.env.FOREST_BOT_TOKEN ?? '';
 
-async function createRoom(duration: number | undefined, token: string) {
-  const request = await fetch(
-    'https://c88fef96.forestapp.cc/api/v1/rooms',
-    {
-      method: 'post',
-      headers: {
-        'content-type': 'application/json',
-        cookie: `remember_token=${token}`,
-        'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
-      },
-      body: JSON.stringify({
-        room_type: 'chartered',
-        target_duration: duration ?? 1500,
-        tree_type: 0,
-      }),
-    },
-  );
-  return request.status === 201 ? request.json() as Record<string, any> : null;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function updateRoom(room: string, options: Record<string, string | number>, token: string) {
-  const request = await fetch(
-    `https://c88fef96.forestapp.cc/api/v1/rooms/${room}`,
-    {
-      method: 'put',
-      headers: {
-        'content-type': 'application/json',
-        cookie: `remember_token=${token}`,
-        'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
-      },
-      body: JSON.stringify(options),
-    },
-  );
-  return request.status === 200;
-}
-
-async function queryRoom(room: string, token: string) {
-  const request = await fetch(
-    `https://c88fef96.forestapp.cc/api/v1/rooms/${room}?detail=true`,
-    {
-      method: 'get',
-      headers: {
-        'content-type': 'application/json',
-        cookie: `remember_token=${token}`,
-        'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
-      },
-    },
-  );
-  // If 304, room has not changed since last query.
-  return request.status === 200 ? request.json() as Record<string, any> : null;
-}
-
-async function leaveRoom(room: string, token: string) {
-  const request = await fetch(
-    `https://c88fef96.forestapp.cc/api/v1/rooms/${room}/leave`,
-    {
-      method: 'put',
-      headers: {
-        'content-type': 'application/json',
-        cookie: `remember_token=${token}`,
-        'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
-      },
-      body: '{}',
-    },
-  );
-  return request.status === 200;
-}
-
-async function startTree(room: string, token: string) {
-  const request = await fetch(
-    `https://c88fef96.forestapp.cc/api/v1/rooms/${room}/start`,
-    {
-      method: 'put',
-      headers: {
-        'content-type': 'application/json',
-        cookie: `remember_token=${token}`,
-        'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
-      },
-      body: '{}',
-    },
-  );
-  // If response code === 423, not enough people are in the room.
-  return request.status === 200;
-}
-
-async function endTree(room: string, token: string) {
-  const request = await fetch(
-    `https://c88fef96.forestapp.cc/api/v1/rooms/${room}/chop`,
-    {
-      method: 'put',
-      headers: {
-        'content-type': 'application/json',
-        cookie: `remember_token=${token}`,
-        'user-agent': 'Forest/4.54.2 (com.forestapp.Forest; build:4142713.7564828918; iOS 15.4.0) Alamofire/5.2.2',
-      },
-      body: JSON.stringify({
-        end_time: (new Date()).toISOString(),
-      }),
-    },
-  );
-  return request.status === 200;
-}
-
-function secondsToTime(e: number) {
-  const h = Math.floor(e / 3600).toString().padStart(2, '0');
-  const m = Math.floor((e % 3600) / 60).toString().padStart(2, '0');
-  const s = Math.floor(e % 60).toString().padStart(2, '0');
-
-  return `${h}:${m}:${s}`;
-}
+const forestApi = new Forest(BOT_TOKEN);
 
 // TODO: place this in a database
 const rooms: Record<string, Record<string, any>> = {};
 
 async function cleanUpRoom(token: string) {
-  const room = rooms[token];
-  await leaveRoom(room.id, BOT_TOKEN);
+  const roomData = rooms[token];
+  const { room } = roomData;
+  await room.leaveRoom();
   clearInterval(room.roomUpdateTimer);
   delete room[token];
 }
@@ -144,8 +35,8 @@ async function forest(interaction: CommandInteraction) {
     return;
   }
 
-  const roomResponse = await createRoom(duration, BOT_TOKEN);
-  if (!roomResponse) {
+  const room = await forestApi.createRoom(duration);
+  if (!room) {
     await interaction.editReply('Something went wrong trying to create a room. You may have entered an invalid time - Forest only allows a minimum of 10 minutes and a maximum of 3 hours.');
     return;
   }
@@ -173,49 +64,51 @@ async function forest(interaction: CommandInteraction) {
   //   );
 
   const updateRoomMessage = async () => {
-    const roomUpdateResponse = await queryRoom(roomResponse.id, BOT_TOKEN);
-    if (roomUpdateResponse) {
+    const roomUpdated = await room.queryRoom();
+    if (roomUpdated) {
       let actionRow: MessageActionRow | null = startActionRow;
 
-      const participants = roomUpdateResponse.participants
-        .map((participant: Record<string, any>) => participant.name);
+      const participants = room.participants
+        ?.map((participant) => participant.name);
 
       const fields = [
-        { name: 'Length', value: `${Math.floor(roomResponse.target_duration / 60)} minutes` },
-        { name: 'Participants', value: `${roomUpdateResponse.participants_count} participants\n\n${participants.join(', ')}` },
+        { name: 'Length', value: `${room.targetDurationInMinutes} minutes` },
       ];
-      if (roomUpdateResponse.start_time) {
+
+      if (participants) {
+        fields.push(
+          { name: 'Participants', value: `${room.participants?.length} participants\n\n${participants.join(', ')}` },
+        );
+      }
+
+      if (room.startTime) {
         actionRow = null;
-        const startDate = new Date(roomUpdateResponse.start_time);
-        const secondsElapsed = ((new Date()).getTime() - startDate.getTime()) / 1000;
-        const secondsRemaining = roomUpdateResponse.target_duration - secondsElapsed;
-        fields.push({ name: 'Time remaining', value: `${secondsToTime(secondsRemaining)} secs` });
+        fields.push({ name: 'Time remaining', value: `${room.humanReadableTimeRemaining} secs` });
       }
 
       const embed = new MessageEmbed()
         .setTitle('Forest room')
-        .setDescription(`Room code: ${roomResponse.token}`)
-        .setURL(`https://www.forestapp.cc/join-room?token=${roomResponse.token}`)
+        .setDescription(`Room code: ${room.roomToken}`)
+        .setURL(`https://www.forestapp.cc/join-room?token=${room.roomToken}`)
         .addFields(fields)
         .setFooter({ text: 'This information updates every 15 seconds. Custom trees are unfortunately not supported.' });
 
-      if (!roomUpdateResponse.is_success) {
+      if (!room.isSuccess) {
         await message.edit({
           content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.',
           embeds: [],
           components: [],
         });
 
-        await cleanUpRoom(roomResponse.token);
+        await cleanUpRoom(room.roomToken);
 
         return;
       }
 
-      const endDate = new Date(roomUpdateResponse.end_time);
-      if (roomUpdateResponse.end_time && Date.now() > endDate.getTime()) {
+      if (room.treeHasGrown) {
         await message.edit({ content: 'Tree has grown!', embeds: [], components: [] });
 
-        await cleanUpRoom(roomResponse.token);
+        await cleanUpRoom(room.roomToken);
 
         return;
       }
@@ -233,10 +126,9 @@ async function forest(interaction: CommandInteraction) {
   await updateRoomMessage();
   const roomUpdateTimer = setInterval(updateRoomMessage, 15000);
 
-  rooms[roomResponse.token] = {
-    id: roomResponse.id,
+  rooms[room.roomToken] = {
+    room,
     message,
-    token: roomResponse.token,
     roomUpdateTimer,
   };
 }
@@ -249,12 +141,13 @@ async function leaveRoomButton(interaction: ButtonInteraction) {
     return;
   }
 
-  const room = rooms[token];
-  if (!room) {
+  const roomData = rooms[token];
+  if (!roomData) {
     await interaction.reply({ content: "This room doesn't exist. You probably tried to run an action on an old message.", ephemeral: true });
     return;
   }
-  const left = await leaveRoom(room.id, BOT_TOKEN);
+  const { room } = roomData;
+  const left = await room.leaveRoom();
   clearInterval(room.roomUpdateTimer);
   if (left) {
     await interaction.update({ content: 'Room cancelled.', embeds: [], components: [] });
@@ -272,12 +165,13 @@ async function plantTreeButton(interaction: ButtonInteraction) {
     return;
   }
 
-  const room = rooms[token];
-  if (!room) {
+  const roomData = rooms[token];
+  if (!roomData) {
     await interaction.reply({ content: "This room doesn't exist. You probably tried to run an action on an old message.", ephemeral: true });
     return;
   }
-  const started = await startTree(room.id, BOT_TOKEN);
+  const { room } = roomData;
+  const started = await room.startTree();
   if (started) {
     await interaction.update({ content: 'Started room. The information will update in just a moment.', components: [] });
   } else {
@@ -293,12 +187,13 @@ async function cancelButton(interaction: ButtonInteraction) {
     return;
   }
 
-  const room = rooms[token];
-  if (!room) {
+  const roomData = rooms[token];
+  if (!roomData) {
     await interaction.reply({ content: "This room doesn't exist. You probably tried to run an action on an old message.", ephemeral: true });
     return;
   }
-  const ended = await endTree(room.id, BOT_TOKEN);
+  const { room } = roomData;
+  const ended = await room.endTree();
   clearInterval(room.roomUpdateTimer);
   if (ended) {
     await interaction.update({ content: 'Killed tree.', embeds: [], components: [] });

@@ -14,7 +14,7 @@ import TimerCommands from './timer';
 import MemeCommands from './memes';
 import TextMemeCommands from './textmemes';
 import UtilCommands from './util';
-import ForestCommands, { ForestButtons } from './forest';
+import ForestCommands, { ForestButtons } from './forest/commands';
 
 type BotButton = {
   id: string,
