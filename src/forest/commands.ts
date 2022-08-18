@@ -21,8 +21,8 @@ async function cleanUpRoom(token: string) {
   const roomData = rooms[token];
   const { room } = roomData;
   await room.leaveRoom();
-  clearInterval(room.roomUpdateTimer);
-  delete room[token];
+  clearInterval(roomData.roomUpdateTimer);
+  delete rooms[token];
 }
 
 async function forest(interaction: CommandInteraction) {
@@ -167,7 +167,7 @@ async function leaveRoomButton(interaction: ButtonInteraction) {
   }
   const { room } = roomData;
   const left = await room.leaveRoom();
-  clearInterval(room.roomUpdateTimer);
+  clearInterval(roomData.roomUpdateTimer);
   if (left) {
     await interaction.update({
       content: 'Room cancelled.',
@@ -218,7 +218,7 @@ async function cancelButton(interaction: ButtonInteraction) {
   }
   const { room } = roomData;
   const ended = await room.endTree();
-  clearInterval(room.roomUpdateTimer);
+  clearInterval(roomData.roomUpdateTimer);
   if (ended) {
     await interaction.update({
       content: 'Killed tree.',
