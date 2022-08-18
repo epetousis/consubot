@@ -105,6 +105,10 @@ export default class Room extends BaseForest {
       null,
       'get',
     );
+
+    // Forest's API returns 401 if the room is no longer valid.
+    if (request.status === 401) return false;
+
     const data = await request.json() as RoomQueryResponse;
 
     this.roomId = data.id;
