@@ -117,6 +117,7 @@ export default class Room extends BaseForest {
     this.targetDuration = data.target_duration;
     this.roomToken = data.token;
     this.participants = data.participants;
+    this.startTime = data.start_time ?? undefined;
     this.endTime = data.end_time ?? undefined;
 
     // If 304, room has not changed since last query.
