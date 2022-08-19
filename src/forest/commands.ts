@@ -134,7 +134,7 @@ async function forest(interaction: CommandInteraction) {
       await message.edit({
         content: null,
         embeds: [embed],
-        files: qrCodeImageAttachment ? [qrCodeImageAttachment] : undefined,
+        files: qrCodeImageAttachment && !room.endTime ? [qrCodeImageAttachment] : undefined,
         components: actionRow ? [actionRow] : [],
       });
     } else {
