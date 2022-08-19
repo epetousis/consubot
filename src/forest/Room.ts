@@ -1,3 +1,4 @@
+import dateReviver from '../common/dateReviver';
 import BaseForest from './BaseForest';
 import RoomCreateResponse from './responses/RoomCreateResponse';
 import { Participant, RoomQueryResponse } from './responses/RoomQueryResponse';
@@ -109,7 +110,8 @@ export default class Room extends BaseForest {
     // Forest's API returns 401 if the room is no longer valid.
     if (request.status === 401) return false;
 
-    const data = await request.json() as RoomQueryResponse;
+    const roomDataString = await request.text();
+    const data = JSON.parse(roomDataString, dateReviver) as RoomQueryResponse;
 
     this.roomId = data.id;
     this.targetDuration = data.target_duration;
