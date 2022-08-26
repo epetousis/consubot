@@ -1,6 +1,10 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/node,macos
-# Edit at https://www.toptal.com/developers/gitignore?templates=node,macos
+# Created by https://www.toptal.com/developers/gitignore/api/node,macos,direnv
+# Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,direnv
+
+### direnv ###
+.direnv
+.envrc.private
 
 ### macOS ###
 # General
@@ -139,6 +143,6 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# End of https://www.toptal.com/developers/gitignore/api/node,macos
+# End of https://www.toptal.com/developers/gitignore/api/node,macos,direnv
 
 config.json
