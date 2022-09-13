@@ -141,6 +141,13 @@ export default class Room extends BaseForest {
       {},
       'put',
     );
+
+    const roomDataString = await request.text();
+    const data = JSON.parse(roomDataString, dateReviver) as RoomQueryResponse;
+
+    this.startTime = data.start_time ?? undefined;
+    this.endTime = data.end_time ?? undefined;
+
     // If response code === 423, not enough people are in the room.
     return request.status === 200;
   }
