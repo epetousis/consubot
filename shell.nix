@@ -6,6 +6,7 @@ pkgs.mkShell {
     pixman
     cairo
     pango
+    python3
   ] ++ lib.optionals stdenv.isDarwin [
     # Dependency for canvas package
     darwin.apple_sdk.frameworks.CoreText
