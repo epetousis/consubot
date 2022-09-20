@@ -88,7 +88,6 @@ interface RoomStoreSerialisedRecord {
   room: string;
   messageId: string;
   channelId: string;
-  roomUpdateTimerId: number;
 }
 
 interface RoomStoreRecord {
@@ -121,5 +120,14 @@ export default class RoomStore {
     clearInterval(roomData.roomUpdateTimer);
     delete this.store[token];
     return success;
+  }
+
+  toJSON() {
+    return Object.values(this.store)
+      .map((data): RoomStoreSerialisedRecord => ({
+        room: JSON.stringify(data.room),
+        messageId: data.message.id,
+        channelId: data.message.channelId,
+      }));
   }
 }
