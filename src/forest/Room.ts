@@ -1,3 +1,4 @@
+import QRCode from 'qrcode';
 import dateReviver from '../common/dateReviver';
 import BaseForest from './BaseForest';
 import RoomCreateResponse from './responses/RoomCreateResponse';
@@ -36,6 +37,9 @@ export default class Room extends BaseForest {
 
   /** A list of the users in this room. */
   participants?: Participant[];
+
+  /** A QR code image buffer linking to the room. */
+  roomQRCode?: Buffer;
 
   /**
    * Returns the target duration in minutes.
@@ -84,6 +88,7 @@ export default class Room extends BaseForest {
     this.isSuccess = roomData.is_success;
     this.startTime = roomData.start_time ?? undefined;
     this.endTime = roomData.end_time ?? undefined;
+    QRCode.toBuffer(`forest://join_room?token=${this.roomToken}`).then((buffer) => { this.roomQRCode = buffer; });
   }
 
   /** Updates the settings for this room. */
@@ -170,5 +175,11 @@ export default class Room extends BaseForest {
       type: 'room',
       data: this.roomCreationData,
     };
+  }
+
+  static fromJSON(token: string, json: Record<string, any>) {
+    if (json.type !== 'room') throw new Error('Not of type Room.');
+
+    return new Room(token, json.data);
   }
 }
