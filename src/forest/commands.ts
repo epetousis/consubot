@@ -1,16 +1,49 @@
 import {
   ButtonInteraction,
+  Client,
   CommandInteraction,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Forest from './Forest';
-import RoomStore from './RoomStore';
+import RoomStore, { RoomStoreSerialisedRecord } from './RoomStore';
+import Room from './Room';
+import { readFile, writeFile } from 'node:fs/promises';
 
 const BOT_TOKEN = process.env.FOREST_BOT_TOKEN ?? '';
 
 const forestApi = new Forest(BOT_TOKEN);
 
 const roomStore = new RoomStore();
+
+const onDiscordInit = async (client: Client) => {
+  const roomStoreData = await readFile('roomdata.json', 'utf-8');
+  const roomStoreObjects: RoomStoreSerialisedRecord[] = JSON.parse(roomStoreData);
+  roomStoreObjects.forEach(async (roomRecord) => {
+    const roomData = JSON.parse(roomRecord.room);
+    // Check that room data is valid
+    if (!('type' in roomData && roomData.type !== 'room')) return;
+    const room = new Room(BOT_TOKEN, roomData);
+
+    const channel = client.channels.cache.get(roomRecord.channelId);
+    if (!channel?.isText()) return;
+    const message = channel.messages.cache.get(roomRecord.messageId) ?? await channel.messages.fetch(roomRecord.messageId);
+
+    roomStore.setRoom(room, message);
+  });
+};
+
+const dumpStore = async () => {
+  try {
+    console.log('[Forest] Exit signal received. Writing room data...');
+    const roomStoreData = JSON.stringify(roomStore);
+    await writeFile('roomdata.json', roomStoreData);
+  } catch (e) {
+    console.log(`[Forest] Unable to write room data: ${e}`);
+  }
+};
+
+process.on('exit', dumpStore);
+process.on('uncaughtException', dumpStore);
 
 async function forest(interaction: CommandInteraction) {
   // The Forest command makes web requests of unknown response time - buy ourselves some time
@@ -111,6 +144,12 @@ async function cancelButton(interaction: ButtonInteraction) {
   } else {
     await interaction.reply({ content: "Couldn't kill tree.", ephemeral: true });
   }
+}
+
+export function ForestHandlers() {
+  return {
+    ready: onDiscordInit,
+  };
 }
 
 export function ForestButtons() {

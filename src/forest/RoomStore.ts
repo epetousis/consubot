@@ -7,7 +7,7 @@ import {
 import Room from './Room';
 import { startActionRow } from './constants';
 
-const updateRoomMessage = async (room: Room, message: Message) => {
+const updateRoomMessage = async (room: Room, message: Message, sender: RoomStore) => {
   const roomUpdated = await room.queryRoom();
   if (roomUpdated) {
     let actionRow: MessageActionRow | null = startActionRow;
@@ -50,7 +50,7 @@ const updateRoomMessage = async (room: Room, message: Message) => {
         components: [],
       });
 
-      await cleanUpRoom(room.roomToken);
+      await sender.cleanUpRoom(room.roomToken);
 
       return;
     }
@@ -63,7 +63,7 @@ const updateRoomMessage = async (room: Room, message: Message) => {
         components: [],
       });
 
-      await cleanUpRoom(room.roomToken);
+      await sender.cleanUpRoom(room.roomToken);
 
       return;
     }
@@ -84,7 +84,7 @@ const updateRoomMessage = async (room: Room, message: Message) => {
   }
 };
 
-interface RoomStoreSerialisedRecord {
+export interface RoomStoreSerialisedRecord {
   room: string;
   messageId: string;
   channelId: string;
@@ -104,8 +104,8 @@ export default class RoomStore {
   }
 
   async setRoom(room: Room, message: Message) {
-    await updateRoomMessage(room, message);
-    const roomUpdateTimer = setInterval(() => updateRoomMessage(room, message), 15000);
+    await updateRoomMessage(room, message, this);
+    const roomUpdateTimer = setInterval(() => updateRoomMessage(room, message, this), 15000);
     this.store[room.roomToken] = {
       room,
       message,

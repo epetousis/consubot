@@ -14,7 +14,7 @@ import TimerCommands from './timer';
 import MemeCommands from './memes';
 import TextMemeCommands from './textmemes';
 import UtilCommands from './util';
-import ForestCommands, { ForestButtons } from './forest/commands';
+import ForestCommands, { ForestButtons, ForestHandlers } from './forest/commands';
 
 type BotButton = {
   id: string,
@@ -57,12 +57,18 @@ const commandExports = [
 const commandDefinitions = new Map<string, BotCommand>();
 commandExports.forEach((command) => commandDefinitions.set(command.data.name, command));
 
+const handlerExports = [
+  ForestHandlers(),
+];
+
 client.once('ready', () => {
   console.log('Ready!');
 
   if (!client.user) return;
 
   client.user.setActivity('with your emotions');
+
+  handlerExports.forEach((exportedHandlers) => exportedHandlers.ready(client));
 });
 
 client.on('interactionCreate', async (interaction) => {
