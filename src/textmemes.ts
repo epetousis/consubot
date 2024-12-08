@@ -9,6 +9,7 @@ enum ReactionImage {
   Bugs = 'bugs',
   Peter = 'peter',
   PeterRun = 'peterrun',
+  Defector = 'defector',
 }
 
 enum AltText {
@@ -18,6 +19,7 @@ enum AltText {
   Bugs = 'An image of Bugs Bunny in a tuxedo with the comment: ',
   Peter = 'An image of Peter Griffin on a black background, paired with the comment: ',
   PeterRun = 'An image of Peter Griffin running from a plane with the following comment overlaid: ',
+  Defector = 'An image of North Korean Defector Yeonmi Park, paired with the comment: ',
 }
 
 interface TextObject {
@@ -140,6 +142,18 @@ async function reactText(interaction: CommandInteraction) {
         altText = `${altText} ${textArray[1].text.text}`;
       }
       return reactTextImage(interaction, 'public/memes/peterrun.jpg', textArray, altText);
+    case ReactionImage.Defector:
+      textArray.push({
+        xPos: 0, yPos: 0, maxWidth: 1252, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      altText = `${AltText.Defector}${textArray[0].text.text}`;
+      if (bottomText != null) {
+        textArray.push({
+          xPos: 0, yPos: -990, maxWidth: 1252, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        });
+        altText = `${altText} ${textArray[1].text.text}`;
+      }
+      return reactTextImage(interaction, 'public/memes/defector.jpg', textArray, altText);
     default:
       return null;
   }
