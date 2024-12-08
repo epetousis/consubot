@@ -121,7 +121,7 @@ async function reactText(interaction: CommandInteraction) {
         textArray.push({
           xPos: 35, yPos: 305, maxWidth: 370, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
         });
-        altText = `${altText} ${textArray[1].text.text}`;
+        altText = `${altText}${textArray[1].text.text}`;
       }
       return reactTextImage(interaction, 'public/memes/bugs.jpg', textArray, altText);
     case ReactionImage.Peter:
