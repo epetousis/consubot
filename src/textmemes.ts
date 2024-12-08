@@ -10,6 +10,7 @@ enum ReactionImage {
   Peter = 'peter',
   PeterRun = 'peterrun',
   Defector = 'defector',
+  Competition = 'competition',
 }
 
 enum AltText {
@@ -20,6 +21,7 @@ enum AltText {
   Peter = 'An image of Peter Griffin on a black background, paired with the comment: ',
   PeterRun = 'An image of Peter Griffin running from a plane with the following comment overlaid: ',
   Defector = 'An image of North Korean Defector Yeonmi Park, paired with the comment: ',
+  Competition = 'An image of Squidward from SpongeBob SquarePants looking shocked with the comment: ',
 }
 
 interface TextObject {
@@ -154,6 +156,18 @@ async function reactText(interaction: CommandInteraction) {
         altText = `${altText} ${textArray[1].text.text}`;
       }
       return reactTextImage(interaction, 'public/memes/defector.jpg', textArray, altText);
+    case ReactionImage.Competition:
+      textArray.push({
+        xPos: 0, yPos: 90, maxWidth: 916, fontColour: '#000', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      altText = `${AltText.Competition}when I'm in a  ${textArray[0].text.text} competition and my opponent is `;
+      if (bottomText != null) {
+        textArray.push({
+          xPos: 525, yPos: 340, maxWidth: 391, fontColour: '#000', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        });
+        altText = `${altText}${textArray[1].text.text}`;
+      }
+      return reactTextImage(interaction, 'public/memes/competition.jpg', textArray, altText);
     default:
       return null;
   }
