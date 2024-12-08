@@ -116,7 +116,7 @@ async function reactText(interaction: CommandInteraction) {
       textArray.push({
         xPos: 35, yPos: 100, maxWidth: 370, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
-      altText = `${AltText.Bugs} I wish all ${textArray[0].text} a very `;
+      altText = `${AltText.Bugs}I wish all ${textArray[0].text} a very `;
       if (bottomText != null) {
         textArray.push({
           xPos: 35, yPos: 305, maxWidth: 370, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
