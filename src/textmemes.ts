@@ -11,6 +11,15 @@ enum ReactionImage {
   PeterRun = 'peterrun',
 }
 
+enum AltText {
+  Rdj = 'A greyscale image of Robert Downey Jr. paired with the comment: ',
+  Jesse = 'A conversation between Breaking Bad characters Walter White and Jesse Pinkman, with Jesse using modern internet slang and Walter not understanding it and asking what he is talking about. The image has the following comment overlaid: ',
+  Gus = 'Image of Breaking Bad character Gustavo Fring, paired with the comment: ',
+  Bugs = 'An image of Bugs Bunny in a tuxedo with the comment: ',
+  Peter = 'An image of Peter Griffin on a black background, paired with the comment: ',
+  PeterRun = 'An image of Peter Griffin running from a plane with the following comment overlaid: ',
+}
+
 interface TextObject {
   text: string;
   alignmentX: number;
@@ -30,13 +39,8 @@ async function reactTextImage(
   message: CommandInteraction,
   path: string,
   attr: TextAttributes[],
+  altText: string,
 ) {
-  let imageDisc = '';
-  if (attr.length !== 2) {
-    imageDisc = attr[0].text.text;
-  } else {
-    imageDisc = `${attr[0].text.text} ${attr[1].text.text}`;
-  }
   const image = await Jimp.read(path);
   const loadedImage = image;
   const font = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
@@ -60,7 +64,7 @@ async function reactTextImage(
     .getBufferAsync(Jimp.MIME_PNG)
     .then(async (imageBuffer) => {
       const finalImage = new MessageAttachment(imageBuffer, `${message.id}.png`)
-        .setDescription(imageDisc.slice(0, 1024));
+        .setDescription(altText.slice(0, 1024));
       await message.editReply({ content: null, files: [finalImage] });
     });
 }
@@ -71,6 +75,7 @@ async function reactText(interaction: CommandInteraction) {
   const bottomText = interaction.options.getString('text2') as string;
   const textArray: TextAttributes[] = [];
 
+  let altText = '';
   let imageText = '';
   if (bottomText === null) {
     imageText = reactionText;
@@ -85,47 +90,56 @@ async function reactText(interaction: CommandInteraction) {
       textArray.push({
         xPos: 69, yPos: 69, maxWidth: 434, fontColour: '#000', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT },
       });
-      return reactTextImage(interaction, 'public/memes/rdj.png', textArray);
+      altText = `${AltText.Rdj}${textArray[0].text.text}`;
+      return reactTextImage(interaction, 'public/memes/rdj.png', textArray, altText);
     case ReactionImage.Jesse:
       textArray.push({
         xPos: 0, yPos: -710, maxWidth: 1280, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
-      return reactTextImage(interaction, 'public/memes/jesse.png', textArray);
+      altText = `${AltText.Jesse}${textArray[0].text.text}`;
+      return reactTextImage(interaction, 'public/memes/jesse.png', textArray, altText);
     case ReactionImage.Gus:
       textArray.push({
         xPos: 12, yPos: 12, maxWidth: 680, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
+      altText = `${AltText.Gus}${textArray[0].text.text}`;
       if (bottomText != null) {
         textArray.push({
           xPos: 12, yPos: -988, maxWidth: 680, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
         });
+        altText = `${altText} ${textArray[1].text.text}`;
       }
-      return reactTextImage(interaction, 'public/memes/gus.png', textArray);
+      return reactTextImage(interaction, 'public/memes/gus.png', textArray, altText);
     case ReactionImage.Bugs:
       textArray.push({
         xPos: 35, yPos: 100, maxWidth: 370, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
+      altText = `${AltText.Bugs} I wish all ${textArray[0].text} a very `;
       if (bottomText != null) {
         textArray.push({
           xPos: 35, yPos: 305, maxWidth: 370, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
         });
+        altText = `${altText} ${textArray[1].text.text}`;
       }
-      return reactTextImage(interaction, 'public/memes/bugs.jpg', textArray);
+      return reactTextImage(interaction, 'public/memes/bugs.jpg', textArray, altText);
     case ReactionImage.Peter:
       textArray.push({
         xPos: 680, yPos: 90, maxWidth: 920, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT },
       });
-      return reactTextImage(interaction, 'public/memes/peter.jpg', textArray);
+      altText = `${AltText.Peter}${textArray[0].text.text}`;
+      return reactTextImage(interaction, 'public/memes/peter.jpg', textArray, altText);
     case ReactionImage.PeterRun:
       textArray.push({
         xPos: 0, yPos: 0, maxWidth: 768, fontColour: '#fff', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
       });
+      altText = `${AltText.PeterRun}${textArray[0].text.text}`;
       if (bottomText != null) {
         textArray.push({
           xPos: 0, yPos: -576, maxWidth: 768, fontColour: '#fff', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
         });
+        altText = `${altText} ${textArray[1].text.text}`;
       }
-      return reactTextImage(interaction, 'public/memes/peterrun.jpg', textArray);
+      return reactTextImage(interaction, 'public/memes/peterrun.jpg', textArray, altText);
     default:
       return null;
   }
