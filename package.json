@@ -8,7 +8,7 @@
     "deploy-commands": "node ./dist/deploy-commands.js",
     "lint-and-compile": "eslint . && tsc",
     "build": "npm run lint-and-compile && npm run deploy-commands",
-    "start": "node ./dist/bot.js",
+    "start": "npm run deploy-commands && node ./dist/bot.js",
     "dev": "npm run build && npm run start",
     "debug": "npm run build && node --inspect ./dist/bot.js"
   },
