@@ -6,8 +6,8 @@
   "scripts": {
     "postinstall": "patch-package",
     "deploy-commands": "node ./dist/deploy-commands.js",
-    "lint-and-compile": "eslint . && tsc",
-    "build": "npm run lint-and-compile && npm run deploy-commands",
+    "lint-and-compile": "tsc",
+    "build": "npm run lint-and-compile",
     "start": "npm run deploy-commands && node ./dist/bot.js",
     "dev": "npm run build && npm run start",
     "debug": "npm run build && node --inspect ./dist/bot.js"

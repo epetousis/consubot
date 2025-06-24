@@ -15,6 +15,9 @@ import MemeCommands from './memes';
 import TextMemeCommands from './textmemes';
 import UtilCommands from './util';
 import ForestCommands, { ForestButtons } from './forest/commands';
+import Room from './forest/Room';
+import forestRoomStore from './common/forest/forestRoomStoreInstance';
+import { updateForestRoomMessage } from './forest/commands';
 
 type BotButton = {
   id: string,
@@ -38,24 +41,9 @@ const client = new Client({
   ],
 });
 
-const buttonExports = [
-  ForestButtons(),
-].flat();
-
 const buttonDefinitions = new Map<string, BotButton>();
-buttonExports.forEach((button) => buttonDefinitions.set(button.id, button));
-
-const commandExports = [
-  FightCommands(),
-  TimerCommands(),
-  MemeCommands(),
-  TextMemeCommands(),
-  UtilCommands(),
-  ForestCommands(),
-].flat();
 
 const commandDefinitions = new Map<string, BotCommand>();
-commandExports.forEach((command) => commandDefinitions.set(command.data.name, command));
 
 client.once('ready', () => {
   console.log('Ready!');
@@ -63,6 +51,9 @@ client.once('ready', () => {
   if (!client.user) return;
 
   client.user.setActivity('with your emotions');
+
+  // Restore rooms and timers on startup (now that client is available and ready)
+  restoreForestRooms();
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -110,6 +101,49 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
+const setupCommandsAndButtons = async () => {
+  const commandExports = [
+    FightCommands(),
+    TimerCommands(),
+    MemeCommands(),
+    TextMemeCommands(),
+    UtilCommands(),
+    ForestCommands(),
+  ].flat();
+  commandExports.forEach((command) => commandDefinitions.set(command.data.name, command));
+
+  ForestButtons().forEach((button) => buttonDefinitions.set(button.id, button));
+};
+
+setupCommandsAndButtons();
+
+// Restore rooms and timers on startup (now that client is available)
+const BOT_TOKEN = process.env.FOREST_BOT_TOKEN ?? '';
+const rooms: Record<string, Record<string, any>> = {};
+
+async function restoreForestRooms() {
+  const loadedRooms = await forestRoomStore.loadRooms();
+  loadedRooms.forEach(async (roomObj: any) => {
+    if (roomObj && roomObj.data && roomObj.channelId && roomObj.messageId) {
+      const room = new Room(BOT_TOKEN, roomObj.data);
+      try {
+        const channel = await client.channels.fetch(roomObj.channelId);
+        if (channel && 'messages' in channel) {
+          const message = await channel.messages.fetch(roomObj.messageId);
+          const startActionRow = null;
+          const updateRoomMessage = async () =>
+            updateForestRoomMessage({ room, message, startActionRow });
+          const roomUpdateTimer = setInterval(updateRoomMessage, 15000);
+          rooms[room.roomToken] = { room, message, roomUpdateTimer };
+        }
+      } catch (e) {
+        console.error(e);
+        // Could not restore message/timer, skip
+      }
+    }
+  });
+}
+
 setupAutoReacts(client);
 setupObama(client);
 client.login(token);
@@ -128,3 +162,5 @@ app.get('/', (_req, res) => {
 app.listen(port, () => {
   console.log(`Bot running on port ${port}`);
 });
+
+export default client;

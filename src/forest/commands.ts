@@ -9,6 +9,7 @@ import {
 import { SlashCommandBuilder } from '@discordjs/builders';
 import QRCode from 'qrcode';
 import Forest from './Forest';
+import forestRoomStore from '../common/forest/forestRoomStoreInstance';
 
 const BOT_TOKEN = process.env.FOREST_BOT_TOKEN ?? '';
 
@@ -17,12 +18,101 @@ const forestApi = new Forest(BOT_TOKEN);
 // TODO: place this in a database
 const rooms: Record<string, Record<string, any>> = {};
 
+// Move persistRooms above usage
+async function persistRooms() {
+  const serializableRooms = Object.values(rooms)
+    .reduce((acc: any[], r) => {
+      if (r.room && typeof r.room.toJSON === 'function' && r.message && r.message.id && r.message.channel && r.message.channel.id) {
+        acc.push({
+          ...r.room.toJSON(),
+          channelId: r.message.channel.id,
+          messageId: r.message.id,
+        });
+      }
+      return acc;
+    }, [] as any[]);
+  await forestRoomStore.saveRooms(serializableRooms);
+}
+
 async function cleanUpRoom(token: string) {
   const roomData = rooms[token];
   const { room } = roomData;
   await room.leaveRoom();
   clearInterval(roomData.roomUpdateTimer);
   delete rooms[token];
+  await persistRooms();
+}
+
+// Helper to update a forest room message
+export async function updateForestRoomMessage({
+  room,
+  message,
+  startActionRow,
+  qrCodeImageAttachment,
+}: {
+  room: any;
+  message: any;
+  startActionRow: MessageActionRow | null;
+  qrCodeImageAttachment?: MessageAttachment;
+}) {
+  const roomUpdated = await room.queryRoom();
+  if (roomUpdated) {
+    let actionRow: MessageActionRow | null = startActionRow;
+    const participants = room.participants?.map((participant: any) => participant.name);
+    const fields = [
+      { name: 'Length', value: `${room.targetDurationInMinutes} minutes` },
+    ];
+    if (participants) {
+      fields.push({
+        name: 'Participants',
+        value: `${room.participants?.length} participants\n\n${participants.join(', ')}`,
+      });
+    }
+    if (room.startTime) {
+      actionRow = null;
+      fields.push({ name: 'Time remaining', value: `${room.humanReadableTimeRemaining} secs` });
+    }
+    const embed = new MessageEmbed()
+      .setTitle('Forest room')
+      .setDescription(`Room code: ${room.roomToken}`)
+      .setURL(`https://www.forestapp.cc/join-room?token=${room.roomToken}`)
+      .addFields(fields)
+      .setFooter({
+        text: 'This information updates every 15 seconds. Custom trees are unfortunately not supported.',
+      });
+    if (!room.endTime) {
+      embed.setImage('attachment://forest_qrcode.png');
+    }
+    if (!room.isSuccess) {
+      await message.edit({
+        content:
+          'Someone appears to have either left the Forest app or simply given up. The tree is now dead.',
+        embeds: [],
+        files: [],
+        components: [],
+      });
+      await cleanUpRoom(room.roomToken);
+      return;
+    }
+    if (room.treeHasGrown) {
+      await message.edit({
+        content: 'Tree has grown!',
+        embeds: [],
+        files: [],
+        components: [],
+      });
+      await cleanUpRoom(room.roomToken);
+      return;
+    }
+    await message.edit({
+      content: null,
+      embeds: [embed],
+      files: qrCodeImageAttachment && !room.endTime ? [qrCodeImageAttachment] : [],
+      components: actionRow ? [actionRow] : [],
+    });
+  } else {
+    await message.edit('Something went wrong trying to get room details.');
+  }
 }
 
 async function forest(interaction: CommandInteraction) {
@@ -56,100 +146,21 @@ async function forest(interaction: CommandInteraction) {
         .setLabel('Plant')
         .setStyle('PRIMARY'),
     );
-
-  // const duringActionRow = new MessageActionRow()
-  //   .addComponents(
-  //     new MessageButton()
-  //       .setCustomId('chopTree')
-  //       .setLabel('Give up')
-  //       .setStyle('DANGER'),
-  //   );
-
   const qrCodeImageAttachment = new MessageAttachment(
     await QRCode.toBuffer(`forest://join_room?token=${room.roomToken}`),
     'forest_qrcode.png',
   );
-
-  const updateRoomMessage = async () => {
-    const roomUpdated = await room.queryRoom();
-    if (roomUpdated) {
-      let actionRow: MessageActionRow | null = startActionRow;
-
-      const participants = room.participants
-        ?.map((participant) => participant.name);
-
-      const fields = [
-        { name: 'Length', value: `${room.targetDurationInMinutes} minutes` },
-      ];
-
-      if (participants) {
-        fields.push(
-          { name: 'Participants', value: `${room.participants?.length} participants\n\n${participants.join(', ')}` },
-        );
-      }
-
-      if (room.startTime) {
-        actionRow = null;
-        fields.push({ name: 'Time remaining', value: `${room.humanReadableTimeRemaining} secs` });
-      }
-
-      const embed = new MessageEmbed()
-        .setTitle('Forest room')
-        .setDescription(`Room code: ${room.roomToken}`)
-        .setURL(`https://www.forestapp.cc/join-room?token=${room.roomToken}`)
-        .addFields(fields)
-        .setFooter({ text: 'This information updates every 15 seconds. Custom trees are unfortunately not supported.' });
-
-      if (!room.endTime) {
-        // If the room hasn't started yet, attach our QR code
-        embed.setImage('attachment://forest_qrcode.png');
-      }
-
-      if (!room.isSuccess) {
-        await message.edit({
-          content: 'Someone appears to have either left the Forest app or simply given up. The tree is now dead.',
-          embeds: [],
-          files: [],
-          components: [],
-        });
-
-        await cleanUpRoom(room.roomToken);
-
-        return;
-      }
-
-      if (room.treeHasGrown) {
-        await message.edit({
-          content: 'Tree has grown!',
-          embeds: [],
-          files: [],
-          components: [],
-        });
-
-        await cleanUpRoom(room.roomToken);
-
-        return;
-      }
-
-      await message.edit({
-        content: null,
-        embeds: [embed],
-        files: qrCodeImageAttachment && !room.endTime ? [qrCodeImageAttachment] : undefined,
-        components: actionRow ? [actionRow] : [],
-      });
-    } else {
-      await message.edit('Something went wrong trying to get room details.');
-    }
-  };
-
+  const updateRoomMessage = async () => updateForestRoomMessage({ room, message, startActionRow, qrCodeImageAttachment });
   await updateRoomMessage();
   const roomUpdateTimer = setInterval(updateRoomMessage, 15000);
-
   rooms[room.roomToken] = {
     room,
     message,
     roomUpdateTimer,
+    channelId: interaction.channelId,
+    messageId: message.id,
   };
+  await persistRooms();
 }
 
 async function leaveRoomButton(interaction: ButtonInteraction) {
@@ -179,6 +190,7 @@ async function leaveRoomButton(interaction: ButtonInteraction) {
     await interaction.reply({ content: "Couldn't leave and cancel the room.", ephemeral: true });
   }
   delete rooms[token];
+  await persistRooms();
 }
 
 async function plantTreeButton(interaction: ButtonInteraction) {
@@ -230,8 +242,10 @@ async function cancelButton(interaction: ButtonInteraction) {
     await interaction.reply({ content: "Couldn't kill tree.", ephemeral: true });
   }
   delete rooms[token];
+  await persistRooms();
 }
 
+// Register ForestButtons here to avoid dependency cycle
 export function ForestButtons() {
   return [
     { handler: cancelButton, id: 'chopTree' },

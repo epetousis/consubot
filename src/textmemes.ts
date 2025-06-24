@@ -11,6 +11,7 @@ enum ReactionImage {
   PeterRun = 'peterrun',
   Defector = 'defector',
   Competition = 'competition',
+  SatanJesus = 'satanjesus',
 }
 
 enum AltText {
@@ -22,6 +23,7 @@ enum AltText {
   PeterRun = 'An image of Peter Griffin running from a plane with the following comment overlaid: ',
   Defector = 'An image of North Korean Defector Yeonmi Park, paired with the comment: ',
   Competition = 'An image of Squidward from SpongeBob SquarePants looking shocked with the comment: ',
+  SatanJesus = 'A meme with two characters, one resembling a devil and the other resembling a holy figure, each with a speech bubble. The left bubble says: ',
 }
 
 interface TextObject {
@@ -168,6 +170,20 @@ async function reactText(interaction: CommandInteraction) {
         altText = `${altText}${textArray[1].text.text}`;
       }
       return reactTextImage(interaction, 'public/memes/competition.jpg', textArray, altText);
+    case ReactionImage.SatanJesus:
+      // Left bubble (devil/left character)
+      textArray.push({
+        xPos: 60, yPos: 600, maxWidth: 340, fontColour: '#000', text: { text: reactionText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+      });
+      altText = `${AltText.SatanJesus}${textArray[0].text.text}`;
+      // Right bubble (holy/right character)
+      if (bottomText != null) {
+        textArray.push({
+          xPos: 600, yPos: 780, maxWidth: 340, fontColour: '#000', text: { text: bottomText.replaceAll(emojiRegex, ''), alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER },
+        });
+        altText = `${altText} The right bubble says: ${textArray[1].text.text}`;
+      }
+      return reactTextImage(interaction, 'public/memes/satanjesus.jpg', textArray, altText);
     default:
       return null;
   }
